@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card as CardComponent } from './Card';
@@ -291,6 +289,76 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
     setDraggedCards(null);
   };
 
+  const renderWasteCards = () => {
+    const allCards = gameState.waste;
+    const startIndex = Math.max(0, allCards.length - 3);
+    const visibleCards = allCards.slice(startIndex);
+    const positions = {
+      0: { x: 0, zIndex: 0 },
+      1: { x: 24, zIndex: 1 },
+      2: { x: 48, zIndex: 2 }
+    };
+
+    return (
+      <div className="relative w-20 h-32">
+        <AnimatePresence mode="popLayout">
+          {visibleCards.map((card, index) => {
+            const position = positions[index as keyof typeof positions];
+            const isTopCard = index === visibleCards.length - 1;
+            const wasteIndex = startIndex + index;
+
+            return (
+              <motion.div
+                key={`${card.suit}-${card.rank}-${wasteIndex}`}
+                initial={{ 
+                  x: -100,
+                  opacity: 0,
+                  zIndex: position.zIndex
+                }}
+                animate={{ 
+                  x: position.x,
+                  opacity: 1,
+                  zIndex: position.zIndex
+                }}
+                exit={{ 
+                  opacity: 0,
+                  transition: { duration: 0.3 }
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeOut"
+                }}
+                style={{ 
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                <CardComponent 
+                  card={card}
+                  draggable={isTopCard}
+                  isDragging={draggedCards?.sourceType === 'waste' && 
+                            draggedCards.sourceIndex === 0 &&
+                            wasteIndex >= draggedCards.cardIndex}
+                  onDragStart={(e) => handleDragStart(
+                    e,
+                    [card],
+                    'waste',
+                    0,
+                    wasteIndex
+                  )}
+                  style={customization.cardStyle}
+                  cardBack={customization.cardBack}
+                  isGrayed={!isTopCard}
+                />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full h-full">
       <GameTopbar
@@ -329,26 +397,7 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
               )}
             </div>
 
-            <div className="relative w-20 h-32">
-              {gameState.waste.map((card, index) => (
-                <div
-                  key={`waste-${index}`}
-                  style={{
-                    position: 'absolute',
-                    left: index * 20,
-                    zIndex: index
-                  }}
-                >
-                  <CardComponent
-                    card={card}
-                    style={customization.cardStyle}
-                    cardBack={customization.cardBack}
-                    draggable={index === gameState.waste.length - 1}
-                    onDragStart={(e) => handleDragStart(e, [card], 'waste', 0, gameState.waste.length - 1)}
-                  />
-                </div>
-              ))}
-            </div>
+            {renderWasteCards()}
           </div>
 
           <div className="col-span-1"></div>

@@ -8,10 +8,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SLTR.com - Play Solitaire Online",
-  description:
-    "Play Solitaire, Spider Solitaire, and FreeCell online for free with no downloads required.",
-  keywords:
-    "solitaire, card games, online games, free solitaire, spider solitaire, freecell",
+  description: "Play Solitaire, Spider Solitaire, and FreeCell online for free with no downloads required.",
+  keywords: "solitaire, card games, online games, free solitaire, spider solitaire, freecell",
 };
 
 export default function RootLayout({
@@ -21,9 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} overflow-y-auto`}>
         <Providers>
-          {children}
+          <div className="min-h-screen flex flex-col">
+            {children}
+          </div>
           <Toaster />
         </Providers>
       </body>
