@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { KlondikePage } from "@/components/pages/KlondikePage";
 

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card as CardComponent } from './Card';
 import { Card } from '@/types/cards';
-import { motion } from 'framer-motion';
 
 interface FoundationPileProps {
   pile: Card[];

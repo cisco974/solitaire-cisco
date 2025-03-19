@@ -1,42 +1,42 @@
 'use client';
 
 import { create } from 'zustand';
-import { Difficulty, GameAction, GameState, KlondikeMode, ValidMove } from '@/types/cards';
+import { Card } from '@/types/cards';
+import { SpiderGameState, SpiderGameAction, SpiderDifficulty, SpiderMode } from '@/types/spiderCards';
 
-interface GameStateStore {
-  gameState: GameState;
-  updateState: (newState: Partial<GameState>) => void;
-  addMove: (action: GameAction) => void;
+interface SpiderGameStore {
+  gameState: SpiderGameState;
+  updateState: (newState: Partial<SpiderGameState>) => void;
+  addMove: (action: SpiderGameAction) => void;
   undo: () => void;
-  showHint: () => void;
-  highlightedMove: ValidMove | null;
-  setMode: (mode: KlondikeMode) => void;
-  setDifficulty: (difficulty: Difficulty) => void;
+  redo: () => void;
+  setDifficulty: (difficulty: SpiderDifficulty) => void;
+  setMode: (mode: SpiderMode) => void;
   updateStats: (won: boolean) => void;
   canUndo: boolean;
+  canRedo: boolean;
 }
 
-const defaultState: GameState = {
+const defaultState: SpiderGameState = {
   score: 0,
   moves: 0,
   startTime: Date.now(),
   isComplete: false,
-  tableauPiles: Array(7).fill([]),
-  foundationPiles: Array(4).fill([]),
+  tableauPiles: Array(10).fill([]),
+  foundationPiles: [],
   stock: [],
-  waste: [],
   difficulty: 'medium',
-  mode: 'draw-1',
+  mode: '1-suit',
   bestScores: {
-    easy: 0,
+    beginner: 0,
     medium: 0,
-    hard: 0
+    expert: 0
   },
   gamesPlayed: 0,
   gamesWon: 0
 };
 
-export const useGameState = create<GameStateStore>((set, get) => ({
+export const useSpiderGameState = create<SpiderGameStore>((set, get) => ({
   gameState: defaultState,
   updateState: (newState) => set((state) => ({
     gameState: { ...state.gameState, ...newState }
@@ -47,15 +47,14 @@ export const useGameState = create<GameStateStore>((set, get) => ({
   undo: () => {
     // Undo implementation
   },
-  showHint: () => {
-    // Show hint implementation
+  redo: () => {
+    // Redo implementation
   },
-  highlightedMove: null,
-  setMode: (mode) => set((state) => ({
-    gameState: { ...state.gameState, mode }
-  })),
   setDifficulty: (difficulty) => set((state) => ({
     gameState: { ...state.gameState, difficulty }
+  })),
+  setMode: (mode) => set((state) => ({
+    gameState: { ...state.gameState, mode }
   })),
   updateStats: (won) => {
     const state = get().gameState;
@@ -71,5 +70,6 @@ export const useGameState = create<GameStateStore>((set, get) => ({
       }
     });
   },
-  canUndo: false
+  canUndo: false,
+  canRedo: false
 }));

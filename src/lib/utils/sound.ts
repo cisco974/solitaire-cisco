@@ -1,3 +1,5 @@
+'use client';
+
 import useSound from 'use-sound';
 
 export function useSoundEffects() {

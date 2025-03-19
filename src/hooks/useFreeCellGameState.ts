@@ -1,32 +1,30 @@
 'use client';
 
 import { create } from 'zustand';
-import { Difficulty, GameAction, GameState, KlondikeMode, ValidMove } from '@/types/cards';
+import { Card } from '@/types/cards';
+import { FreeCellGameState, FreeCellGameAction, FreeCellDifficulty } from '@/types/freecellCards';
 
-interface GameStateStore {
-  gameState: GameState;
-  updateState: (newState: Partial<GameState>) => void;
-  addMove: (action: GameAction) => void;
+interface FreeCellGameStore {
+  gameState: FreeCellGameState;
+  updateState: (newState: Partial<FreeCellGameState>) => void;
+  addMove: (action: FreeCellGameAction) => void;
   undo: () => void;
-  showHint: () => void;
-  highlightedMove: ValidMove | null;
-  setMode: (mode: KlondikeMode) => void;
-  setDifficulty: (difficulty: Difficulty) => void;
+  redo: () => void;
+  setDifficulty: (difficulty: FreeCellDifficulty) => void;
   updateStats: (won: boolean) => void;
   canUndo: boolean;
+  canRedo: boolean;
 }
 
-const defaultState: GameState = {
+const defaultState: FreeCellGameState = {
   score: 0,
   moves: 0,
   startTime: Date.now(),
   isComplete: false,
-  tableauPiles: Array(7).fill([]),
+  tableauPiles: Array(8).fill([]),
   foundationPiles: Array(4).fill([]),
-  stock: [],
-  waste: [],
+  freeCells: Array(4).fill(null),
   difficulty: 'medium',
-  mode: 'draw-1',
   bestScores: {
     easy: 0,
     medium: 0,
@@ -36,24 +34,23 @@ const defaultState: GameState = {
   gamesWon: 0
 };
 
-export const useGameState = create<GameStateStore>((set, get) => ({
+export const useFreeCellGameState = create<FreeCellGameStore>((set, get) => ({
   gameState: defaultState,
   updateState: (newState) => set((state) => ({
     gameState: { ...state.gameState, ...newState }
   })),
   addMove: (action) => {
     // Add move implementation
+    // This would store the move in a history array for undo/redo
   },
   undo: () => {
     // Undo implementation
+    // This would revert the last move from history
   },
-  showHint: () => {
-    // Show hint implementation
+  redo: () => {
+    // Redo implementation
+    // This would reapply a previously undone move
   },
-  highlightedMove: null,
-  setMode: (mode) => set((state) => ({
-    gameState: { ...state.gameState, mode }
-  })),
   setDifficulty: (difficulty) => set((state) => ({
     gameState: { ...state.gameState, difficulty }
   })),
@@ -71,5 +68,6 @@ export const useGameState = create<GameStateStore>((set, get) => ({
       }
     });
   },
-  canUndo: false
+  canUndo: false,
+  canRedo: false
 }));

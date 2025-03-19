@@ -291,18 +291,6 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
     setDraggedCards(null);
   };
 
-  const handleCardClick = (card: Card, source: 'tableau' | 'waste' | 'foundation', pileIndex: number) => {
-    // Handle card click logic
-  };
-
-  const handleFoundationClick = (index: number) => {
-    // Handle foundation click logic
-  };
-
-  const handleTableauPileClick = (index: number) => {
-    // Handle tableau pile click logic
-  };
-
   return (
     <div className="w-full h-full">
       <GameTopbar

@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, Suit, Rank } from '@/types/cards';
 
 export function createDeck(): Card[] {
@@ -21,4 +23,16 @@ export function shuffle<T>(array: T[]): T[] {
     [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
   return newArray;
+}
+
+export function getRankValue(rank: Rank): number {
+  const rankValues: Record<Rank, number> = {
+    'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+    '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13
+  };
+  return rankValues[rank];
+}
+
+export function getCardColor(suit: Suit): 'red' | 'black' {
+  return suit === '♥' || suit === '♦' ? 'red' : 'black';
 }
