@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SLTR.com - Play Solitaire Online",
@@ -19,12 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} overflow-y-auto`}>
+      <body className="overflow-y-auto">
         <Providers>
           <div className="min-h-screen flex flex-col">
             {children}
           </div>
-          <Toaster />
         </Providers>
       </body>
     </html>

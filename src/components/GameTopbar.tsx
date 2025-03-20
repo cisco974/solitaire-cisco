@@ -28,7 +28,7 @@ export function GameTopbar({
   onUndo,
   onHint,
   onMagicWand,
-  hasMagicMove,
+  hasMagicMove = false,
   extraControls
 }: GameTopbarProps) {
   const { 
@@ -74,7 +74,7 @@ export function GameTopbar({
   };
 
   const handleMagicWandClick = () => {
-    if (useMagicMove() && onMagicWand) {
+    if (hasMagicMove && useMagicMove() && onMagicWand) {
       onMagicWand();
     }
   };
@@ -140,7 +140,7 @@ export function GameTopbar({
           >
             <RotateCcw className="w-4 h-4" />
             <span>Undo</span>
-            {(undosRemaining > 0 || !canUseUndo) && gameCanUndo && (
+            {gameCanUndo && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
                   {undosRemaining > 0 ? undosRemaining : 'Ad'}
@@ -158,13 +158,11 @@ export function GameTopbar({
             >
               <Lightbulb className="w-4 h-4" />
               <span>Hint</span>
-              {(hintsRemaining > 0 || !canUseHint) && (
-                <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">
-                    {hintsRemaining > 0 ? hintsRemaining : 'Ad'}
-                  </span>
-                </div>
-              )}
+              <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
+                <span className="text-white text-xs font-bold">
+                  {hintsRemaining > 0 ? hintsRemaining : 'Ad'}
+                </span>
+              </div>
             </motion.button>
           )}
 
@@ -177,13 +175,11 @@ export function GameTopbar({
             >
               <Wand2 className="w-4 h-4" />
               <span>Magic</span>
-              {(magicMovesRemaining > 0 || !canUseMagicMove) && (
-                <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">
-                    {magicMovesRemaining > 0 ? magicMovesRemaining : 'Ad'}
-                  </span>
-                </div>
-              )}
+              <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
+                <span className="text-white text-xs font-bold">
+                  {magicMovesRemaining > 0 ? magicMovesRemaining : 'Ad'}
+                </span>
+              </div>
             </motion.button>
           )}
         </div>

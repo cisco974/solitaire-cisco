@@ -1,6 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface MagicWandState {
   movesRemaining: number;
@@ -16,31 +17,38 @@ interface MagicWandStore extends MagicWandState {
 
 const MAGIC_MOVES_PER_GAME = 3;
 
-export const useMagicWand = create<MagicWandStore>((set) => ({
-  movesRemaining: MAGIC_MOVES_PER_GAME,
-  showAdModal: false,
-  canUseMagicMove: true,
+export const useMagicWand = create<MagicWandStore>()(
+  persist(
+    (set) => ({
+      movesRemaining: MAGIC_MOVES_PER_GAME,
+      showAdModal: false,
+      canUseMagicMove: true,
 
-  useMagicMove: () => {
-    let success = false;
-    set((state) => {
-      if (state.movesRemaining > 0) {
-        success = true;
-        return { movesRemaining: state.movesRemaining - 1 };
-      }
-      return { showAdModal: true };
-    });
-    return success;
-  },
+      useMagicMove: () => {
+        let success = false;
+        set((state) => {
+          if (state.movesRemaining > 0) {
+            success = true;
+            return { movesRemaining: state.movesRemaining - 1 };
+          }
+          return { showAdModal: true };
+        });
+        return success;
+      },
 
-  closeAdModal: () => set((state) => ({
-    showAdModal: false,
-    movesRemaining: state.movesRemaining + 1
-  })),
+      closeAdModal: () => set((state) => ({
+        showAdModal: false,
+        movesRemaining: state.movesRemaining + 1
+      })),
 
-  resetMagicMoves: () => set({
-    movesRemaining: MAGIC_MOVES_PER_GAME,
-    showAdModal: false,
-    canUseMagicMove: true
-  })
-}));
+      resetMagicMoves: () => set({
+        movesRemaining: MAGIC_MOVES_PER_GAME,
+        showAdModal: false,
+        canUseMagicMove: true
+      })
+    }),
+    {
+      name: 'magic-wand-storage'
+    }
+  )
+);
