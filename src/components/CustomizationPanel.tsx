@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Volume2, Volume2 as Volume2Off, Zap, ZapOff, PlayCircle, StopCircle } from 'lucide-react';
@@ -11,7 +9,7 @@ import {
   tableStyles,
   cardStyles,
   GameCustomization
-} from '@/types/customization';
+} from '../types/customization';
 
 interface CustomizationPanelProps {
   isOpen: boolean;

@@ -1,17 +1,15 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card as CardComponent } from './Card';
 import { DifficultySelector } from './DifficultySelector';
 import { GameTopbar } from './GameTopbar';
 import { FoundationPile } from './FoundationPile';
-import { Card, isPartOfDescendingSequence } from '@/types/cards';
-import { SpiderGameState, SpiderDifficulty, isValidSpiderTableauMove, isValidSpiderFoundationMove, checkSpiderWinCondition } from '@/types/spiderCards';
+import { Card, isPartOfDescendingSequence } from '../types/cards';
+import { SpiderGameState, SpiderDifficulty, isValidSpiderTableauMove, isValidSpiderFoundationMove, checkSpiderWinCondition } from '../types/spiderCards';
 import { Trophy } from 'lucide-react';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { useSpiderGameState } from '@/hooks/useSpiderGameState';
-import { GameCustomization } from '@/types/customization';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useSpiderGameState } from '../hooks/useSpiderGameState';
+import { GameCustomization } from '../types/customization';
 
 interface SpiderSolitaireProps {
   mode?: 'draw-1' | 'draw-3';
@@ -490,5 +488,3 @@ function calculateScore(state: SpiderGameState): number {
   
   return Math.floor((state.score + timeBonus) * difficultyMultiplier);
 }
-
-export default SpiderSolitaire;

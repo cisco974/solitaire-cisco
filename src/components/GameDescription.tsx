@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import { Trophy, Sparkles, Brain, Zap, Target, Star, Award, ChevronDown, ChevronUp } from 'lucide-react';
 

@@ -1,9 +1,7 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { KlondikeMode } from '@/types/cards';
-import { SpiderMode } from '@/types/spiderCards';
+import { KlondikeMode } from '../types/cards';
+import { SpiderMode } from '../types/spiderCards';
 
 interface NewGameModalProps {
   isOpen: boolean;
@@ -17,16 +15,16 @@ const gameOptions = {
   klondike: {
     name: 'Klondike',
     modes: [
-      { id: 'draw-1', name: 'Draw 1 Card', description: 'Draw one card at a time. Easier to plan moves.' },
-      { id: 'draw-3', name: 'Draw 3 Cards', description: 'Draw three cards at a time. More challenging.' }
+      { id: 'draw-1', name: 'Draw 1 Card' },
+      { id: 'draw-3', name: 'Draw 3 Cards' }
     ]
   },
   spider: {
     name: 'Spider',
     modes: [
-      { id: '1-suit', name: '1 Suit', description: 'Play with spades only. Best for beginners.' },
-      { id: '2-suits', name: '2 Suits', description: 'Play with spades and hearts. Intermediate difficulty.' },
-      { id: '4-suits', name: '4 Suits', description: 'Play with all suits. Most challenging.' }
+      { id: '1-suit', name: '1 Suit' },
+      { id: '2-suits', name: '2 Suits' },
+      { id: '4-suits', name: '4 Suits' }
     ]
   },
   freecell: {
@@ -41,7 +39,7 @@ const difficulties = [
   { id: 'hard', name: 'Hard', description: 'Challenging card layouts' }
 ];
 
-export default function NewGameModal({ isOpen, onClose, onNewGame, currentGame, initialMode }: NewGameModalProps) {
+export function NewGameModal({ isOpen, onClose, onNewGame, currentGame, initialMode }: NewGameModalProps) {
   const [selectedMode, setSelectedMode] = useState<string>(initialMode);
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
 
@@ -67,7 +65,7 @@ export default function NewGameModal({ isOpen, onClose, onNewGame, currentGame, 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-xl p-8 max-w-md w-full mx-4 overflow-y-auto max-h-[90vh]"
+            className="bg-white rounded-xl p-8 max-w-md w-full mx-4"
           >
             <h2 className="text-2xl font-bold mb-6">New Game - {gameOptions[currentGame].name}</h2>
 
@@ -75,25 +73,20 @@ export default function NewGameModal({ isOpen, onClose, onNewGame, currentGame, 
             {gameOptions[currentGame].modes.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-gray-700 font-medium mb-3">Game Mode</h3>
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
                   {gameOptions[currentGame].modes.map(mode => (
                     <button
                       key={mode.id}
                       onClick={() => setSelectedMode(mode.id)}
                       className={`
-                        w-full p-3 rounded-lg border-2 transition-colors text-left
+                        p-2 rounded-lg border-2 transition-colors
                         ${selectedMode === mode.id
-                          ? 'border-emerald-500 bg-emerald-50'
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                           : 'border-gray-200 hover:border-emerald-200'
                         }
                       `}
                     >
-                      <div className={`font-medium ${selectedMode === mode.id ? 'text-emerald-700' : 'text-gray-900'}`}>
-                        {mode.name}
-                      </div>
-                      <div className={`text-sm ${selectedMode === mode.id ? 'text-emerald-600' : 'text-gray-500'}`}>
-                        {mode.description}
-                      </div>
+                      {mode.name}
                     </button>
                   ))}
                 </div>
@@ -147,3 +140,5 @@ export default function NewGameModal({ isOpen, onClose, onNewGame, currentGame, 
     </AnimatePresence>
   );
 }
+
+export default NewGameModal;

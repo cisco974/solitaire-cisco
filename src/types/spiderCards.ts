@@ -1,6 +1,4 @@
-'use client';
-
-import { Card, Suit, Rank } from '@/types/cards';
+import { Card } from './cards';
 
 export interface SpiderGameState {
   score: number;
@@ -83,3 +81,5 @@ function getRankValue(rank: string): number {
   };
   return rankValues[rank];
 }
+
+export { SpiderSolitaire };

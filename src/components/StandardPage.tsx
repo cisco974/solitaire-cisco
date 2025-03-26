@@ -1,9 +1,7 @@
-'use client';
-
 import React from 'react';
-import Link from 'next/link';
-import { useGameCustomization } from '@/hooks/useGameCustomization';
-import { tableStyles } from '@/types/customization';
+import { Link } from 'react-router-dom';
+import { useGameCustomization } from '../hooks/useGameCustomization';
+import { tableStyles } from '../types/customization';
 
 interface StandardPageProps {
   title: string;
@@ -28,7 +26,7 @@ export function StandardPage({ title, children }: StandardPageProps) {
             <div className="max-w-6xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center space-x-4">
+                <Link to="/" className="flex items-center space-x-4">
                   <div className="hidden sm:flex space-x-1">
                     <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">♥</div>
                     <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">♦</div>
@@ -40,9 +38,9 @@ export function StandardPage({ title, children }: StandardPageProps) {
 
                 {/* Navigation Links */}
                 <nav className="flex items-center space-x-6">
-                  <Link href="/" className="text-white/70 hover:text-white transition-colors">Klondike</Link>
-                  <Link href="/spider" className="text-white/70 hover:text-white transition-colors">Spider</Link>
-                  <Link href="/freecell" className="text-white/70 hover:text-white transition-colors">FreeCell</Link>
+                  <Link to="/?game=klondike" className="text-white/70 hover:text-white transition-colors">Klondike</Link>
+                  <Link to="/?game=spider" className="text-white/70 hover:text-white transition-colors">Spider</Link>
+                  <Link to="/?game=freecell" className="text-white/70 hover:text-white transition-colors">FreeCell</Link>
                 </nav>
               </div>
             </div>

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { KlondikePage } from "@/components/pages/KlondikePage";
+import { KlondikePage } from "@/pages/KlondikePage";
 
 export default function Home() {
   return <KlondikePage />;

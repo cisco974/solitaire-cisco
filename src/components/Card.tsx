@@ -1,9 +1,7 @@
-'use client';
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card as CardType } from '@/types/cards';
-import { cardStyles, cardBackStyles, CardBackStyle } from '@/types/customization';
+import { Card as CardType } from '../types/cards';
+import { cardStyles, cardBackStyles, CardBackStyle } from '../types/customization';
 
 interface CardProps {
   card: CardType;

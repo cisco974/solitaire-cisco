@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Facebook, Share2, Copy, MessageCircle, Send, X } from 'lucide-react';

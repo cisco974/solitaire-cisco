@@ -1,16 +1,11 @@
-'use client';
-
+import { Outlet } from 'react-router-dom';
 import { Footer } from './Footer';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export function Layout({ children }: LayoutProps) {
+export function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-[rgb(238,238,228)]">
       <div className="flex-1 flex flex-col">
-        {children}
+        <Outlet />
       </div>
       <Footer />
     </div>

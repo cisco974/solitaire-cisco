@@ -1,9 +1,7 @@
-'use client';
-
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from './Card';
-import { Card as CardType } from '@/types/cards';
+import { Card as CardType } from '../types/cards';
 
 interface MagicMoveOverlayProps {
   isVisible: boolean;

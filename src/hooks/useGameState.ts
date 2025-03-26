@@ -1,132 +1,224 @@
-'use client';
+import { useCallback, useState } from "react";
+import {
+  Difficulty,
+  findValidMoves,
+  GameAction,
+  GameState,
+  KlondikeMode,
+  ValidMove,
+} from "@/types/cards";
 
-import { create } from 'zustand';
-import { Difficulty, GameAction, GameState, KlondikeMode, ValidMove, findValidMoves } from '@/types/cards';
+const STORAGE_KEY = "klondike-stats";
 
-interface GameStateStore {
-  gameState: GameState;
-  history: GameAction[];
-  historyIndex: number;
-  updateState: (newState: Partial<GameState>) => void;
-  addMove: (action: GameAction) => void;
-  undo: () => void;
-  showHint: () => void;
-  highlightedMove: ValidMove | null;
-  setMode: (mode: KlondikeMode) => void;
-  setDifficulty: (difficulty: Difficulty) => void;
-  updateStats: (won: boolean) => void;
-  canUndo: boolean;
-}
-
-const defaultState: GameState = {
-  score: 0,
-  moves: 0,
-  startTime: Date.now(),
-  isComplete: false,
-  tableauPiles: Array(7).fill([]),
-  foundationPiles: Array(4).fill([]),
-  stock: [],
-  waste: [],
-  difficulty: 'medium',
-  mode: 'draw-1',
+const defaultStats = {
   bestScores: {
     easy: 0,
     medium: 0,
-    hard: 0
+    hard: 0,
   },
   gamesPlayed: 0,
-  gamesWon: 0
+  gamesWon: 0,
 };
 
-export const useGameState = create<GameStateStore>((set, get) => ({
-  gameState: defaultState,
-  history: [],
-  historyIndex: -1,
-  updateState: (newState) => set((state) => ({
-    gameState: { ...state.gameState, ...newState }
-  })),
-  addMove: (action) => {
-    set((state) => {
-      const newHistory = [...state.history.slice(0, state.historyIndex + 1), action];
-      return {
-        history: newHistory,
-        historyIndex: state.historyIndex + 1,
-        canUndo: true
-      };
-    });
-  },
-  undo: () => {
-    const state = get();
-    if (state.historyIndex < 0) return;
+const getInitialState = (): GameState => {
+  const baseState = {
+    score: 0,
+    moves: 0,
+    startTime: Date.now(),
+    isComplete: false,
+    tableauPiles: Array(7).fill([]),
+    foundationPiles: Array(4).fill([]),
+    stock: [],
+    waste: [],
+    difficulty: "medium" as Difficulty,
+    mode: "draw-1" as KlondikeMode,
+    ...defaultStats,
+  };
 
-    const action = state.history[state.historyIndex];
+  const savedState = localStorage.getItem(STORAGE_KEY);
+  if (savedState) {
+    try {
+      const parsed = JSON.parse(savedState);
+      return {
+        ...baseState,
+        difficulty: parsed.difficulty || baseState.difficulty,
+        mode: parsed.mode || baseState.mode,
+        bestScores: parsed.bestScores || defaultStats.bestScores,
+        gamesPlayed: parsed.gamesPlayed || 0,
+        gamesWon: parsed.gamesWon || 0,
+      };
+    } catch (e) {
+      console.error("Error parsing saved state:", e);
+      return baseState;
+    }
+  }
+
+  return baseState;
+};
+
+export function useGameState() {
+  const [gameState, setGameState] = useState<GameState>(getInitialState);
+  const [history, setHistory] = useState<GameAction[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [highlightedMove, setHighlightedMove] = useState<ValidMove | null>(
+    null,
+  );
+
+  const saveState = useCallback((state: GameState) => {
+    const stateToSave = {
+      difficulty: state.difficulty,
+      mode: state.mode,
+      bestScores: state.bestScores,
+      gamesPlayed: state.gamesPlayed,
+      gamesWon: state.gamesWon,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+  }, []);
+
+  const updateState = useCallback(
+    (newState: Partial<GameState>) => {
+      setGameState((prev) => {
+        const updated = { ...prev, ...newState };
+        saveState(updated);
+        return updated;
+      });
+    },
+    [saveState],
+  );
+
+  const addMove = useCallback(
+    (action: GameAction) => {
+      setHistory((prev) => [...prev.slice(0, historyIndex + 1), action]);
+      setHistoryIndex((prev) => prev + 1);
+    },
+    [historyIndex],
+  );
+
+  const undo = useCallback(() => {
+    if (historyIndex < 0) return;
+
+    const action = history[historyIndex];
     const { from, to, cards } = action;
 
-    const newState = { ...state.gameState };
-    newState.tableauPiles = state.gameState.tableauPiles.map(pile => [...pile]);
-    newState.foundationPiles = state.gameState.foundationPiles.map(pile => [...pile]);
-    newState.waste = [...state.gameState.waste];
+    setGameState((prev) => {
+      const newState = { ...prev };
+      newState.tableauPiles = prev.tableauPiles.map((pile) => [...pile]);
+      newState.foundationPiles = prev.foundationPiles.map((pile) => [...pile]);
+      newState.waste = [...prev.waste];
 
-    // Remove cards from destination
-    if (to.type === 'tableau') {
-      newState.tableauPiles[to.index] = newState.tableauPiles[to.index].slice(0, -cards.length);
-    } else if (to.type === 'foundation') {
-      newState.foundationPiles[to.index] = newState.foundationPiles[to.index].slice(0, -1);
-    }
-
-    // Add cards back to source
-    if (from.type === 'tableau') {
-      if (from.cardIndex !== undefined) {
-        newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, from.cardIndex);
+      if (to.type === "tableau") {
+        newState.tableauPiles[to.index] = newState.tableauPiles[to.index].slice(
+          0,
+          -cards.length,
+        );
+      } else if (to.type === "foundation") {
+        newState.foundationPiles[to.index] = newState.foundationPiles[
+          to.index
+        ].slice(0, -1);
       }
-      newState.tableauPiles[from.index] = [...newState.tableauPiles[from.index], ...cards];
-    } else if (from.type === 'waste') {
-      newState.waste = [...newState.waste, ...cards];
-    }
 
-    set({
-      gameState: {
+      if (from.type === "tableau") {
+        if (from.cardIndex !== undefined) {
+          newState.tableauPiles[from.index] = newState.tableauPiles[
+            from.index
+          ].slice(0, from.cardIndex);
+        }
+        newState.tableauPiles[from.index] = [
+          ...newState.tableauPiles[from.index],
+          ...cards,
+        ];
+      } else if (from.type === "waste") {
+        newState.waste = [...newState.waste, ...cards];
+      }
+
+      return {
         ...newState,
-        moves: state.gameState.moves + 1,
-        score: Math.max(0, state.gameState.score - 10)
-      },
-      historyIndex: state.historyIndex - 1,
-      canUndo: state.historyIndex > 0
+        moves: prev.moves + 1,
+        score: Math.max(0, prev.score - 10),
+      };
     });
-  },
-  showHint: () => {
-    const state = get().gameState;
-    const validMoves = findValidMoves(state);
+
+    setHistoryIndex((prev) => prev - 1);
+  }, [history, historyIndex]);
+
+  const showHint = useCallback(() => {
+    const validMoves = findValidMoves(gameState);
     if (validMoves.length > 0) {
-      const foundationMoves = validMoves.filter(move => move.to.type === 'foundation');
-      const move = foundationMoves.length > 0 ? foundationMoves[0] : validMoves[0];
-      set({ highlightedMove: move });
-      
+      // Prioritize foundation moves, then tableau moves
+      const foundationMoves = validMoves.filter(
+        (move) => move.to.type === "foundation",
+      );
+      const move =
+        foundationMoves.length > 0 ? foundationMoves[0] : validMoves[0];
+      setHighlightedMove(move);
+
+      // Clear highlight after 2 seconds
       setTimeout(() => {
-        set({ highlightedMove: null });
+        setHighlightedMove(null);
       }, 2000);
     }
-  },
-  highlightedMove: null,
-  setMode: (mode) => set((state) => ({
-    gameState: { ...state.gameState, mode }
-  })),
-  setDifficulty: (difficulty) => set((state) => ({
-    gameState: { ...state.gameState, difficulty }
-  })),
-  updateStats: (won) => {
-    const state = get().gameState;
-    set({
-      gameState: {
-        ...state,
-        gamesPlayed: state.gamesPlayed + 1,
-        gamesWon: state.gamesWon + (won ? 1 : 0),
-        bestScores: {
-          ...state.bestScores,
-          [state.difficulty]: won ? Math.max(state.bestScores[state.difficulty], state.score) : state.bestScores[state.difficulty]
+  }, [gameState]);
+
+  const setDifficulty = useCallback(
+    (difficulty: Difficulty) => {
+      updateState({ difficulty });
+    },
+    [updateState],
+  );
+
+  const setMode = useCallback(
+    (mode: KlondikeMode) => {
+      updateState({ mode });
+    },
+    [updateState],
+  );
+
+  const updateStats = useCallback(
+    (won: boolean) => {
+      setGameState((prev) => {
+        const newState = {
+          ...prev,
+          gamesPlayed: (prev.gamesPlayed || 0) + 1,
+          gamesWon: (prev.gamesWon || 0) + (won ? 1 : 0),
+        };
+
+        if (won) {
+          const finalScore = calculateScore(prev);
+          if (finalScore > (prev.bestScores[prev.difficulty] || 0)) {
+            newState.bestScores = {
+              ...prev.bestScores,
+              [prev.difficulty]: finalScore,
+            };
+          }
         }
-      }
-    });
-  },
-  canUndo: false
-}));
+
+        saveState(newState);
+        return newState;
+      });
+    },
+    [saveState],
+  );
+
+  return {
+    gameState,
+    updateState,
+    addMove,
+    undo,
+    showHint,
+    highlightedMove,
+    setDifficulty,
+    setMode,
+    updateStats,
+    canUndo: historyIndex >= 0,
+  };
+}
+
+function calculateScore(state: GameState): number {
+  const timeBonus = Math.max(0, 700000 - (Date.now() - state.startTime)) / 1000;
+  const difficultyMultiplier = {
+    easy: 1,
+    medium: 1.5,
+    hard: 2,
+  }[state.difficulty];
+  return Math.floor((state.score + timeBonus) * difficultyMultiplier);
+}

@@ -1,26 +1,23 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card as CardComponent } from './Card';
 import { DifficultySelector } from './DifficultySelector';
 import { GameTopbar } from './GameTopbar';
 import { FoundationPile } from './FoundationPile';
-import { Card, isPartOfDescendingSequence, getRankValue, getCardColor } from '@/types/cards';
-import { FreeCellGameState, FreeCellDifficulty, isValidFreeCellMove, isValidFreeCellFoundationMove, checkFreeCellWinCondition } from '@/types/freecellCards';
+import { Card, isPartOfDescendingSequence, getRankValue, getCardColor } from '../types/cards';
+import { FreeCellGameState, FreeCellDifficulty, isValidFreeCellMove, isValidFreeCellFoundationMove, checkFreeCellWinCondition } from '../types/freecellCards';
 import { Trophy } from 'lucide-react';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { useFreeCellGameState } from '@/hooks/useFreeCellGameState';
-import { GameCustomization } from '@/types/customization';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useFreeCellGameState } from '../hooks/useFreeCellGameState';
+import { GameCustomization } from '../types/customization';
 
 interface FreeCellProps {
   customization: GameCustomization;
-  difficulty: FreeCellDifficulty;
 }
 
 function createFreeCellDeck(): Card[] {
-  const suits = ['♠', '♥', '♦', '♣'] as const;
-  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'] as const;
+  const suits = ['♠', '♥', '♦', '♣'];
+  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   const deck: Card[] = [];
 
   for (const suit of suits) {
@@ -41,7 +38,7 @@ function shuffle(array: Card[]): Card[] {
   return newArray;
 }
 
-export function FreeCell({ customization, difficulty }: FreeCellProps) {
+export function FreeCell({ customization }: FreeCellProps) {
   const { 
     gameState, 
     updateState, 
@@ -61,14 +58,13 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const { playCardMove, playCardFlip, playWin, playError } = useSoundEffects();
-  const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     startNewGame();
   }, []);
 
   useEffect(() => {
-    if (hasStarted && checkFreeCellWinCondition(gameState.foundationPiles)) {
+    if (checkFreeCellWinCondition(gameState.foundationPiles)) {
       playWin();
       updateState({
         isComplete: true,
@@ -76,7 +72,7 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
       });
       updateStats(true);
     }
-  }, [gameState.foundationPiles, playWin, updateState, updateStats, hasStarted]);
+  }, [gameState.foundationPiles, playWin, updateState, updateStats]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -92,6 +88,7 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
     const deck = createFreeCellDeck();
     const newTableauPiles: Card[][] = Array(8).fill([]).map(() => []);
     
+    // Deal cards to tableau piles
     for (let i = 0; i < 52; i++) {
       const pileIndex = i % 8;
       const card = deck.pop()!;
@@ -107,9 +104,47 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
       startTime: Date.now(),
       isComplete: false
     });
-    
-    setHasStarted(true);
   }
+
+  const isValidSequence = (cards: Card[]): boolean => {
+    if (cards.length === 0) return true;
+    if (cards.length === 1) return true;
+
+    for (let i = 0; i < cards.length - 1; i++) {
+      const currentCard = cards[i];
+      const nextCard = cards[i + 1];
+      
+      if (getCardColor(currentCard.suit) === getCardColor(nextCard.suit)) return false;
+      if (getRankValue(currentCard.rank) !== getRankValue(nextCard.rank) + 1) return false;
+    }
+
+    return true;
+  };
+
+  const isCardInValidSequence = (pileIndex: number, cardIndex: number): boolean => {
+    const pile = gameState.tableauPiles[pileIndex];
+    
+    // Last card in pile is always valid for moving
+    if (cardIndex === pile.length - 1) return true;
+    
+    // Check if this card starts a valid sequence to the end of the pile
+    const sequence = pile.slice(cardIndex);
+    return isValidSequence(sequence);
+  };
+
+  const canDragCard = (pileIndex: number, cardIndex: number): boolean => {
+    // Check if the card is part of a valid sequence
+    if (!isCardInValidSequence(pileIndex, cardIndex)) return false;
+
+    // Calculate maximum movable cards based on free cells and empty columns
+    const emptyFreeCells = gameState.freeCells.filter(cell => cell === null).length;
+    const emptyColumns = gameState.tableauPiles.filter(pile => pile.length === 0).length;
+    const maxMovableCards = (emptyFreeCells + 1) * Math.pow(2, emptyColumns);
+
+    // Check if sequence length is within movable limit
+    const sequenceLength = gameState.tableauPiles[pileIndex].length - cardIndex;
+    return sequenceLength <= maxMovableCards;
+  };
 
   const handleDragStart = (
     e: React.DragEvent,
@@ -284,46 +319,6 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
     setDraggedCards(null);
   };
 
-  const canDragCard = (pileIndex: number, cardIndex: number): boolean => {
-    // Check if the card is part of a valid sequence
-    if (!isCardInValidSequence(pileIndex, cardIndex)) return false;
-
-    // Calculate maximum movable cards based on free cells and empty columns
-    const emptyFreeCells = gameState.freeCells.filter(cell => cell === null).length;
-    const emptyColumns = gameState.tableauPiles.filter(pile => pile.length === 0).length;
-    const maxMovableCards = (emptyFreeCells + 1) * Math.pow(2, emptyColumns);
-
-    // Check if sequence length is within movable limit
-    const sequenceLength = gameState.tableauPiles[pileIndex].length - cardIndex;
-    return sequenceLength <= maxMovableCards;
-  };
-
-  const isCardInValidSequence = (pileIndex: number, cardIndex: number): boolean => {
-    const pile = gameState.tableauPiles[pileIndex];
-    
-    // Last card in pile is always valid for moving
-    if (cardIndex === pile.length - 1) return true;
-    
-    // Check if this card starts a valid sequence to the end of the pile
-    const sequence = pile.slice(cardIndex);
-    return isValidSequence(sequence);
-  };
-
-  const isValidSequence = (cards: Card[]): boolean => {
-    if (cards.length === 0) return true;
-    if (cards.length === 1) return true;
-
-    for (let i = 0; i < cards.length - 1; i++) {
-      const currentCard = cards[i];
-      const nextCard = cards[i + 1];
-      
-      if (getCardColor(currentCard.suit) === getCardColor(nextCard.suit)) return false;
-      if (getRankValue(currentCard.rank) !== getRankValue(nextCard.rank) + 1) return false;
-    }
-
-    return true;
-  };
-
   return (
     <div className="w-full h-full">
       {/* Settings Modal */}
@@ -485,8 +480,7 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
                     <CardComponent 
                       card={card}
                       draggable={canDragCard(pileIndex, cardIndex)}
-                      isDragging={draggedCards?.sourceType === 'tableau' && 
-                                draggedCards.sourceIndex === pileIndex && 
+                      isDragging={draggedCards?.sourceIndex === pileIndex && 
                                 cardIndex >= draggedCards.cardIndex}
                       onDragStart={(e) => handleDragStart(
                         e,

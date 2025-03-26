@@ -1,11 +1,9 @@
-'use client';
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Clock, Target, Zap, Brain } from 'lucide-react';
-import { GameState } from '@/types/cards';
-import { SpiderGameState } from '@/types/spiderCards';
-import { FreeCellGameState } from '@/types/freecellCards';
+import { GameState } from '../types/cards';
+import { SpiderGameState } from '../types/spiderCards';
+import { FreeCellGameState } from '../types/freecellCards';
 
 interface StatsModalProps {
   isOpen: boolean;

@@ -1,32 +1,10 @@
-'use client';
+import { useState, useCallback } from 'react';
+import { Card } from '../types/cards';
+import { FreeCellGameState, FreeCellGameAction, FreeCellDifficulty } from '../types/freecellCards';
 
-import { create } from 'zustand';
-import { Card } from '@/types/cards';
-import { FreeCellGameState, FreeCellGameAction, FreeCellDifficulty } from '@/types/freecellCards';
+const STORAGE_KEY = 'freecell-stats';
 
-interface FreeCellGameStore {
-  gameState: FreeCellGameState;
-  history: FreeCellGameAction[];
-  historyIndex: number;
-  updateState: (newState: Partial<FreeCellGameState>) => void;
-  addMove: (action: FreeCellGameAction) => void;
-  undo: () => void;
-  redo: () => void;
-  setDifficulty: (difficulty: FreeCellDifficulty) => void;
-  updateStats: (won: boolean) => void;
-  canUndo: boolean;
-  canRedo: boolean;
-}
-
-const defaultState: FreeCellGameState = {
-  score: 0,
-  moves: 0,
-  startTime: Date.now(),
-  isComplete: false,
-  tableauPiles: Array(8).fill([]),
-  foundationPiles: Array(4).fill([]),
-  freeCells: Array(4).fill(null),
-  difficulty: 'medium',
+const defaultStats = {
   bestScores: {
     easy: 0,
     medium: 0,
@@ -36,122 +14,193 @@ const defaultState: FreeCellGameState = {
   gamesWon: 0
 };
 
-export const useFreeCellGameState = create<FreeCellGameStore>((set, get) => ({
-  gameState: defaultState,
-  history: [],
-  historyIndex: -1,
-  updateState: (newState) => set((state) => ({
-    gameState: { ...state.gameState, ...newState }
-  })),
-  addMove: (action) => {
-    set((state) => {
-      const newHistory = [...state.history.slice(0, state.historyIndex + 1), action];
+const getInitialState = (): FreeCellGameState => {
+  const baseState = {
+    score: 0,
+    moves: 0,
+    startTime: Date.now(),
+    isComplete: false,
+    tableauPiles: Array(8).fill([]),
+    foundationPiles: Array(4).fill([]),
+    freeCells: Array(4).fill(null),
+    difficulty: 'medium' as FreeCellDifficulty,
+    ...defaultStats
+  };
+
+  const savedState = localStorage.getItem(STORAGE_KEY);
+  if (savedState) {
+    try {
+      const parsed = JSON.parse(savedState);
       return {
-        history: newHistory,
-        historyIndex: state.historyIndex + 1,
-        canUndo: true,
-        canRedo: false
+        ...baseState,
+        difficulty: parsed.difficulty || baseState.difficulty,
+        bestScores: parsed.bestScores || defaultStats.bestScores,
+        gamesPlayed: parsed.gamesPlayed || 0,
+        gamesWon: parsed.gamesWon || 0
+      };
+    } catch (e) {
+      console.error('Error parsing saved state:', e);
+      return baseState;
+    }
+  }
+
+  return baseState;
+};
+
+export function useFreeCellGameState() {
+  const [gameState, setGameState] = useState<FreeCellGameState>(getInitialState);
+  const [history, setHistory] = useState<FreeCellGameAction[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  const saveState = useCallback((state: FreeCellGameState) => {
+    const stateToSave = {
+      difficulty: state.difficulty,
+      bestScores: state.bestScores,
+      gamesPlayed: state.gamesPlayed,
+      gamesWon: state.gamesWon
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+  }, []);
+
+  const updateState = useCallback((newState: Partial<FreeCellGameState>) => {
+    setGameState(prev => {
+      const updated = { ...prev, ...newState };
+      saveState(updated);
+      return updated;
+    });
+  }, [saveState]);
+
+  const addMove = useCallback((action: FreeCellGameAction) => {
+    setHistory(prev => [...prev.slice(0, historyIndex + 1), action]);
+    setHistoryIndex(prev => prev + 1);
+  }, [historyIndex]);
+
+  const undo = useCallback(() => {
+    if (historyIndex < 0) return;
+
+    const action = history[historyIndex];
+    const { from, to, cards } = action;
+
+    setGameState(prev => {
+      const newState = { ...prev };
+      newState.tableauPiles = prev.tableauPiles.map(pile => [...pile]);
+      newState.foundationPiles = prev.foundationPiles.map(pile => [...pile]);
+      newState.freeCells = [...prev.freeCells];
+
+      if (to.type === 'tableau') {
+        newState.tableauPiles[to.index] = newState.tableauPiles[to.index].slice(0, -cards.length);
+      } else if (to.type === 'foundation') {
+        newState.foundationPiles[to.index] = newState.foundationPiles[to.index].slice(0, -1);
+      } else if (to.type === 'freeCell') {
+        newState.freeCells[to.index] = null;
+      }
+
+      if (from.type === 'tableau') {
+        if (from.cardIndex !== undefined) {
+          newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, from.cardIndex);
+        }
+        newState.tableauPiles[from.index] = [...newState.tableauPiles[from.index], ...cards];
+      } else if (from.type === 'freeCell') {
+        newState.freeCells[from.index] = cards[0];
+      }
+
+      return {
+        ...newState,
+        moves: prev.moves + 1,
+        score: Math.max(0, prev.score - 10)
       };
     });
-  },
-  undo: () => {
-    const state = get();
-    if (state.historyIndex < 0) return;
 
-    const action = state.history[state.historyIndex];
+    setHistoryIndex(prev => prev - 1);
+  }, [history, historyIndex]);
+
+  const redo = useCallback(() => {
+    if (historyIndex >= history.length - 1) return;
+
+    const action = history[historyIndex + 1];
     const { from, to, cards } = action;
 
-    const newState = { ...state.gameState };
-    newState.tableauPiles = state.gameState.tableauPiles.map(pile => [...pile]);
-    newState.foundationPiles = state.gameState.foundationPiles.map(pile => [...pile]);
-    newState.freeCells = [...state.gameState.freeCells];
+    setGameState(prev => {
+      const newState = { ...prev };
+      newState.tableauPiles = prev.tableauPiles.map(pile => [...pile]);
+      newState.foundationPiles = prev.foundationPiles.map(pile => [...pile]);
+      newState.freeCells = [...prev.freeCells];
 
-    if (to.type === 'tableau') {
-      newState.tableauPiles[to.index] = newState.tableauPiles[to.index].slice(0, -cards.length);
-    } else if (to.type === 'foundation') {
-      newState.foundationPiles[to.index] = newState.foundationPiles[to.index].slice(0, -1);
-    } else if (to.type === 'freeCell') {
-      newState.freeCells[to.index] = null;
-    }
-
-    if (from.type === 'tableau') {
-      if (from.cardIndex !== undefined) {
-        newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, from.cardIndex);
+      if (from.type === 'tableau') {
+        if (from.cardIndex !== undefined) {
+          newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, from.cardIndex);
+        } else {
+          newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, -cards.length);
+        }
+      } else if (from.type === 'freeCell') {
+        newState.freeCells[from.index] = null;
       }
-      newState.tableauPiles[from.index] = [...newState.tableauPiles[from.index], ...cards];
-    } else if (from.type === 'freeCell') {
-      newState.freeCells[from.index] = cards[0];
-    }
 
-    set({
-      gameState: {
-        ...newState,
-        moves: state.gameState.moves + 1,
-        score: Math.max(0, state.gameState.score - 10)
-      },
-      historyIndex: state.historyIndex - 1,
-      canUndo: state.historyIndex > 0,
-      canRedo: true
-    });
-  },
-  redo: () => {
-    const state = get();
-    if (state.historyIndex >= state.history.length - 1) return;
-
-    const action = state.history[state.historyIndex + 1];
-    const { from, to, cards } = action;
-
-    const newState = { ...state.gameState };
-    newState.tableauPiles = state.gameState.tableauPiles.map(pile => [...pile]);
-    newState.foundationPiles = state.gameState.foundationPiles.map(pile => [...pile]);
-    newState.freeCells = [...state.gameState.freeCells];
-
-    if (from.type === 'tableau') {
-      if (from.cardIndex !== undefined) {
-        newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, from.cardIndex);
-      } else {
-        newState.tableauPiles[from.index] = newState.tableauPiles[from.index].slice(0, -cards.length);
+      if (to.type === 'tableau') {
+        newState.tableauPiles[to.index] = [...newState.tableauPiles[to.index], ...cards];
+      } else if (to.type === 'foundation') {
+        newState.foundationPiles[to.index] = [...newState.foundationPiles[to.index], ...cards];
+      } else if (to.type === 'freeCell') {
+        newState.freeCells[to.index] = cards[0];
       }
-    } else if (from.type === 'freeCell') {
-      newState.freeCells[from.index] = null;
-    }
 
-    if (to.type === 'tableau') {
-      newState.tableauPiles[to.index] = [...newState.tableauPiles[to.index], ...cards];
-    } else if (to.type === 'foundation') {
-      newState.foundationPiles[to.index] = [...newState.foundationPiles[to.index], ...cards];
-    } else if (to.type === 'freeCell') {
-      newState.freeCells[to.index] = cards[0];
-    }
-
-    set({
-      gameState: {
+      return {
         ...newState,
-        moves: state.gameState.moves + 1,
-        score: state.gameState.score + 10
-      },
-      historyIndex: state.historyIndex + 1,
-      canUndo: true,
-      canRedo: state.historyIndex < state.history.length - 2
+        moves: prev.moves + 1,
+        score: prev.score + 10
+      };
     });
-  },
-  setDifficulty: (difficulty) => set((state) => ({
-    gameState: { ...state.gameState, difficulty }
-  })),
-  updateStats: (won) => {
-    const state = get().gameState;
-    set({
-      gameState: {
-        ...state,
-        gamesPlayed: state.gamesPlayed + 1,
-        gamesWon: state.gamesWon + (won ? 1 : 0),
-        bestScores: {
-          ...state.bestScores,
-          [state.difficulty]: won ? Math.max(state.bestScores[state.difficulty], state.score) : state.bestScores[state.difficulty]
+
+    setHistoryIndex(prev => prev + 1);
+  }, [history, historyIndex]);
+
+  const setDifficulty = useCallback((difficulty: FreeCellDifficulty) => {
+    updateState({ difficulty });
+  }, [updateState]);
+
+  const updateStats = useCallback((won: boolean) => {
+    setGameState(prev => {
+      const newState = {
+        ...prev,
+        gamesPlayed: (prev.gamesPlayed || 0) + 1,
+        gamesWon: (prev.gamesWon || 0) + (won ? 1 : 0)
+      };
+
+      if (won) {
+        const finalScore = calculateScore(prev);
+        if (finalScore > (prev.bestScores[prev.difficulty] || 0)) {
+          newState.bestScores = {
+            ...prev.bestScores,
+            [prev.difficulty]: finalScore
+          };
         }
       }
+
+      saveState(newState);
+      return newState;
     });
-  },
-  canUndo: false,
-  canRedo: false
-}));
+  }, [saveState]);
+
+  return {
+    gameState,
+    updateState,
+    addMove,
+    undo,
+    redo,
+    setDifficulty,
+    updateStats,
+    canUndo: historyIndex >= 0,
+    canRedo: historyIndex < history.length - 1
+  };
+}
+
+function calculateScore(state: FreeCellGameState): number {
+  const timeBonus = Math.max(0, 500000 - (Date.now() - state.startTime)) / 1000;
+  const difficultyMultiplier = {
+    easy: 1,
+    medium: 1.5,
+    hard: 2
+  }[state.difficulty];
+  
+  return Math.floor((state.score + timeBonus) * difficultyMultiplier);
+}

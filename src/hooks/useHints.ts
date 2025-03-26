@@ -1,46 +1,55 @@
-'use client';
-
-import { create } from 'zustand';
-
-interface HintsState {
-  hintsRemaining: number;
-  showAdModal: boolean;
-  canUseHint: boolean;
-}
-
-interface HintsStore extends HintsState {
-  useHint: () => boolean;
-  closeAdModal: () => void;
-  resetHints: () => void;
-}
+import { useState, useCallback } from 'react';
 
 const HINTS_PER_GAME = 3;
 
-export const useHints = create<HintsStore>((set) => ({
-  hintsRemaining: HINTS_PER_GAME,
-  showAdModal: false,
-  canUseHint: true,
+interface HintState {
+  hintsRemaining: number;
+  showAdModal: boolean;
+}
 
-  useHint: () => {
-    let success = false;
-    set((state) => {
-      if (state.hintsRemaining > 0) {
-        success = true;
-        return { hintsRemaining: state.hintsRemaining - 1 };
-      }
-      return { showAdModal: true };
-    });
-    return success;
-  },
-
-  closeAdModal: () => set((state) => ({
-    showAdModal: false,
-    hintsRemaining: state.hintsRemaining + 1
-  })),
-
-  resetHints: () => set({
+export function useHints() {
+  const [state, setState] = useState<HintState>({
     hintsRemaining: HINTS_PER_GAME,
-    showAdModal: false,
-    canUseHint: true
-  })
-}));
+    showAdModal: false
+  });
+
+  const useHint = useCallback(() => {
+    if (state.hintsRemaining > 0) {
+      setState(prev => ({
+        ...prev,
+        hintsRemaining: prev.hintsRemaining - 1
+      }));
+      return true;
+    }
+    setState(prev => ({
+      ...prev,
+      showAdModal: true
+    }));
+    return false;
+  }, [state.hintsRemaining]);
+
+  const closeAdModal = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      showAdModal: false,
+      // Add one hint after watching the ad
+      hintsRemaining: prev.hintsRemaining + 1
+    }));
+  }, []);
+
+  const resetHints = useCallback(() => {
+    setState({
+      hintsRemaining: HINTS_PER_GAME,
+      showAdModal: false
+    });
+  }, []);
+
+  return {
+    hintsRemaining: state.hintsRemaining,
+    showAdModal: state.showAdModal,
+    canUseHint: state.hintsRemaining > 0,
+    useHint,
+    closeAdModal,
+    resetHints
+  };
+}

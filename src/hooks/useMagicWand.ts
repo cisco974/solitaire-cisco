@@ -1,54 +1,54 @@
-'use client';
+import { useState, useCallback } from 'react';
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+const MAGIC_MOVES_PER_GAME = 3;
 
 interface MagicWandState {
   movesRemaining: number;
   showAdModal: boolean;
-  canUseMagicMove: boolean;
 }
 
-interface MagicWandStore extends MagicWandState {
-  useMagicMove: () => boolean;
-  closeAdModal: () => void;
-  resetMagicMoves: () => void;
-}
+export function useMagicWand() {
+  const [state, setState] = useState<MagicWandState>({
+    movesRemaining: MAGIC_MOVES_PER_GAME,
+    showAdModal: false
+  });
 
-const MAGIC_MOVES_PER_GAME = 3;
-
-export const useMagicWand = create<MagicWandStore>()(
-  persist(
-    (set) => ({
-      movesRemaining: MAGIC_MOVES_PER_GAME,
-      showAdModal: false,
-      canUseMagicMove: true,
-
-      useMagicMove: () => {
-        let success = false;
-        set((state) => {
-          if (state.movesRemaining > 0) {
-            success = true;
-            return { movesRemaining: state.movesRemaining - 1 };
-          }
-          return { showAdModal: true };
-        });
-        return success;
-      },
-
-      closeAdModal: () => set((state) => ({
-        showAdModal: false,
-        movesRemaining: state.movesRemaining + 1
-      })),
-
-      resetMagicMoves: () => set({
-        movesRemaining: MAGIC_MOVES_PER_GAME,
-        showAdModal: false,
-        canUseMagicMove: true
-      })
-    }),
-    {
-      name: 'magic-wand-storage'
+  const useMagicMove = useCallback(() => {
+    if (state.movesRemaining > 0) {
+      setState(prev => ({
+        ...prev,
+        movesRemaining: prev.movesRemaining - 1
+      }));
+      return true;
     }
-  )
-);
+    setState(prev => ({
+      ...prev,
+      showAdModal: true
+    }));
+    return false;
+  }, [state.movesRemaining]);
+
+  const closeAdModal = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      showAdModal: false,
+      movesRemaining: prev.movesRemaining + 1
+    }));
+  }, []);
+
+  const resetMagicMoves = useCallback(() => {
+    setState({
+      movesRemaining: MAGIC_MOVES_PER_GAME,
+      showAdModal: false
+    });
+  }, []);
+
+  return {
+    movesRemaining: state.movesRemaining,
+    showAdModal: state.showAdModal,
+    canUseMagicMove: state.movesRemaining > 0,
+    useMagicMove,
+    closeAdModal,
+    resetMagicMoves
+  };
+}

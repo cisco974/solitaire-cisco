@@ -1,3 +1,5 @@
+import { GameCustomization } from './customization';
+
 export type CardBackStyle = 
   | 'classic-red'
   | 'classic-emerald'

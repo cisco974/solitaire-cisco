@@ -1,5 +1,3 @@
-'use client';
-
 export type Suit = '♠' | '♥' | '♦' | '♣';
 export type Rank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K';
 export type Color = 'red' | 'black';
@@ -182,6 +180,61 @@ export const findValidMoves = (state: GameState): ValidMove[] => {
   return validMoves;
 };
 
+export const findValidFoundationMove = (state: GameState): ValidMove | null => {
+  // Check tableau piles for valid foundation moves
+  for (let i = 0; i < state.tableauPiles.length; i++) {
+    const pile = state.tableauPiles[i];
+    if (pile.length === 0) continue;
+
+    const card = pile[pile.length - 1];
+    if (!card.faceUp) continue;
+
+    // Check each foundation pile
+    for (let j = 0; j < state.foundationPiles.length; j++) {
+      if (isValidFoundationMove(card, state.foundationPiles[j])) {
+        return {
+          from: { type: 'tableau', index: i },
+          to: { type: 'foundation', index: j },
+          cards: [card]
+        };
+      }
+    }
+  }
+
+  // Check waste pile for valid foundation moves
+  if (state.waste.length > 0) {
+    const card = state.waste[state.waste.length - 1];
+    for (let j = 0; j < state.foundationPiles.length; j++) {
+      if (isValidFoundationMove(card, state.foundationPiles[j])) {
+        return {
+          from: { type: 'waste', index: 0 },
+          to: { type: 'foundation', index: j },
+          cards: [card]
+        };
+      }
+    }
+  }
+
+  return null;
+};
+
 export const checkWinCondition = (foundationPiles: Card[][]): boolean => {
   return foundationPiles.every(pile => pile.length === 13);
+};
+
+export const findFaceDownCard = (state: GameState): ValidMove | null => {
+  // Check tableau piles for face-down cards
+  for (let i = 0; i < state.tableauPiles.length; i++) {
+    const pile = state.tableauPiles[i];
+    for (let j = pile.length - 1; j >= 0; j--) {
+      if (!pile[j].faceUp) {
+        return {
+          from: { type: 'tableau', index: i, cardIndex: j },
+          to: { type: 'tableau', index: i },
+          cards: [pile[j]]
+        };
+      }
+    }
+  }
+  return null;
 };

@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
 import { Facebook } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 const languages = [
   // European languages
@@ -37,7 +35,7 @@ export function Footer() {
           {/* Logo and Navigation */}
           <div className="flex flex-col md:flex-row items-center justify-between w-full gap-6">
             {/* Logo */}
-            <Link href="/" onClick={handleLinkClick} className="flex items-center space-x-4">
+            <Link to="/" onClick={handleLinkClick} className="flex items-center space-x-4">
               <div className="flex space-x-1">
                 <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg transform hover:scale-105 transition-transform">♥</div>
                 <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg transform hover:scale-105 transition-transform">♦</div>
@@ -49,10 +47,10 @@ export function Footer() {
 
             {/* Navigation Links */}
             <nav className="flex items-center gap-8">
-              <Link href="/articles" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">Articles</Link>
-              <Link href="/about" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">About Us</Link>
-              <Link href="/terms" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">Terms of Use</Link>
-              <Link href="/privacy" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/articles" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">Articles</Link>
+              <Link to="/about" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">About Us</Link>
+              <Link to="/terms" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">Terms of Use</Link>
+              <Link to="/privacy" onClick={handleLinkClick} className="text-sm text-white/70 hover:text-white transition-colors">Privacy Policy</Link>
               <a href="#" className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
                 <Facebook className="w-5 h-5" />
               </a>
@@ -88,7 +86,7 @@ export function Footer() {
             </p>
 
             <div className="text-center">
-              <Link href="/privacy" onClick={handleLinkClick} className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
+              <Link to="/privacy" onClick={handleLinkClick} className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
                 Paramètres concernant la confidentialité et les cookies
               </Link>
               <p className="text-xs text-white/50 mt-2">

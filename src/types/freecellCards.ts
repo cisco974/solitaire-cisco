@@ -1,6 +1,4 @@
-'use client';
-
-import { Card, Suit, Rank } from '@/types/cards';
+import { Card, Suit, Rank } from './cards';
 
 export interface FreeCellGameState {
   score: number;
@@ -68,6 +66,17 @@ export const isValidFreeCellFoundationMove = (card: Card, targetPile: Card[]): b
 
 export const checkFreeCellWinCondition = (foundationPiles: Card[][]): boolean => {
   return foundationPiles.every(pile => pile.length === 13);
+};
+
+export const calculateFreeCellScore = (state: FreeCellGameState): number => {
+  const timeBonus = Math.max(0, 500000 - (Date.now() - state.startTime)) / 1000;
+  const difficultyMultiplier = {
+    easy: 1,
+    medium: 1.5,
+    hard: 2
+  }[state.difficulty];
+  
+  return Math.floor((state.score + timeBonus) * difficultyMultiplier);
 };
 
 function getRankValue(rank: Rank): number {

@@ -1,11 +1,9 @@
-'use client';
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { RotateCcw, Lightbulb, Wand2 } from 'lucide-react';
-import { useHints } from '@/hooks/useHints';
-import { useUndoCredits } from '@/hooks/useUndoCredits';
-import { useMagicWand } from '@/hooks/useMagicWand';
+import { useHints } from '../hooks/useHints';
+import { useUndoCredits } from '../hooks/useUndoCredits';
+import { useMagicWand } from '../hooks/useMagicWand';
 import { AdModal } from './AdModal';
 
 interface GameTopbarProps {
@@ -14,9 +12,8 @@ interface GameTopbarProps {
   score: number;
   canUndo: boolean;
   onUndo: () => void;
-  onHint?: () => void;
-  onMagicWand?: () => void;
-  hasMagicMove?: boolean;
+  onHint: () => void;
+  onMagicWand: () => void;
   extraControls?: React.ReactNode;
 }
 
@@ -28,7 +25,6 @@ export function GameTopbar({
   onUndo,
   onHint,
   onMagicWand,
-  hasMagicMove = false,
   extraControls
 }: GameTopbarProps) {
   const { 
@@ -62,7 +58,7 @@ export function GameTopbar({
   };
 
   const handleHintClick = () => {
-    if (useHint() && onHint) {
+    if (useHint()) {
       onHint();
     }
   };
@@ -74,7 +70,7 @@ export function GameTopbar({
   };
 
   const handleMagicWandClick = () => {
-    if (hasMagicMove && useMagicMove() && onMagicWand) {
+    if (useMagicMove()) {
       onMagicWand();
     }
   };
@@ -140,7 +136,7 @@ export function GameTopbar({
           >
             <RotateCcw className="w-4 h-4" />
             <span>Undo</span>
-            {gameCanUndo && (
+            {(undosRemaining > 0 || !canUseUndo) && gameCanUndo && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
                   {undosRemaining > 0 ? undosRemaining : 'Ad'}
@@ -149,39 +145,39 @@ export function GameTopbar({
             )}
           </motion.button>
 
-          {onHint && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleHintClick}
-              className={`relative ${actionButtonClasses} text-white`}
-            >
-              <Lightbulb className="w-4 h-4" />
-              <span>Hint</span>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleHintClick}
+            className={`relative ${actionButtonClasses} text-white`}
+          >
+            <Lightbulb className="w-4 h-4" />
+            <span>Hint</span>
+            {(hintsRemaining > 0 || !canUseHint) && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
                   {hintsRemaining > 0 ? hintsRemaining : 'Ad'}
                 </span>
               </div>
-            </motion.button>
-          )}
+            )}
+          </motion.button>
 
-          {onMagicWand && hasMagicMove && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleMagicWandClick}
-              className={`relative ${actionButtonClasses} text-white`}
-            >
-              <Wand2 className="w-4 h-4" />
-              <span>Magic</span>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleMagicWandClick}
+            className={`relative ${actionButtonClasses} text-white`}
+          >
+            <Wand2 className="w-4 h-4" />
+            <span>Magic</span>
+            {(magicMovesRemaining > 0 || !canUseMagicMove) && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
                   {magicMovesRemaining > 0 ? magicMovesRemaining : 'Ad'}
                 </span>
               </div>
-            </motion.button>
-          )}
+            )}
+          </motion.button>
         </div>
       </div>
 

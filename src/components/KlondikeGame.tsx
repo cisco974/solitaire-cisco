@@ -5,11 +5,11 @@ import { DifficultySelector } from './DifficultySelector';
 import { GameTopbar } from './GameTopbar';
 import { FoundationPile } from './FoundationPile';
 import { MagicMoveOverlay } from './MagicMoveOverlay';
-import { Card, isValidFoundationMove, isValidTableauMove, checkWinCondition, ValidMove, findValidMoves } from '@/types/cards';
+import { Card, isValidFoundationMove, isValidTableauMove, checkWinCondition, ValidMove, findValidMoves } from '../types/cards';
 import { Trophy } from 'lucide-react';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { useGameState } from '@/hooks/useGameState';
-import { GameCustomization } from '@/types/customization';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useGameState } from '../hooks/useGameState';
+import { GameCustomization } from '../types/customization';
 
 interface KlondikeGameProps {
   mode?: 'draw-1' | 'draw-3';
@@ -17,8 +17,8 @@ interface KlondikeGameProps {
 }
 
 function createDeck(): Card[] {
-  const suits = ['♠', '♥', '♦', '♣'] as const;
-  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'] as const;
+  const suits = ['♠', '♥', '♦', '♣'];
+  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   const deck: Card[] = [];
 
   for (const suit of suits) {
@@ -44,7 +44,7 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
     gameState, 
     updateState, 
     addMove, 
-    undo, 
+    undo,
     showHint,
     highlightedMove,
     canUndo,
@@ -122,7 +122,133 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
     setHasStarted(true);
   }
 
-  const handleDeckClick = () => {
+  const baguetteMagique = () => {
+    const visibleCards = new Set<string>();
+    
+    gameState.tableauPiles.forEach(pile => {
+      pile.forEach(card => {
+        if (card.faceUp) {
+          visibleCards.add(`${card.suit}${card.rank}`);
+        }
+      });
+    });
+
+    gameState.waste.forEach(card => {
+      visibleCards.add(`${card.suit}${card.rank}`);
+    });
+
+    gameState.foundationPiles.forEach(pile => {
+      pile.forEach(card => {
+        visibleCards.add(`${card.suit}${card.rank}`);
+      });
+    });
+
+    const possibleMoves: { suit: Suit, rank: Rank, targetPile: number }[] = [];
+
+    gameState.foundationPiles.forEach((pile, index) => {
+      if (pile.length === 0) {
+        ['♠', '♥', '♦', '♣'].forEach(suit => {
+          const cardKey = `${suit}A`;
+          if (!visibleCards.has(cardKey)) {
+            possibleMoves.push({ suit: suit as Suit, rank: 'A', targetPile: index });
+          }
+        });
+      } else {
+        const topCard = pile[pile.length - 1];
+        const nextRank = getNextRank(topCard.rank);
+        if (nextRank) {
+          const cardKey = `${topCard.suit}${nextRank}`;
+          if (!visibleCards.has(cardKey)) {
+            possibleMoves.push({ suit: topCard.suit, rank: nextRank, targetPile: index });
+          }
+        }
+      }
+    });
+
+    if (possibleMoves.length > 0) {
+      const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+      const card: Card = { suit: move.suit, rank: move.rank, faceUp: true };
+      
+      // Trouver une carte face cachée à retirer
+      let sourcePileIndex = -1;
+      let sourceCardIndex = -1;
+
+      for (let i = 0; i < gameState.tableauPiles.length && sourcePileIndex === -1; i++) {
+        const pile = gameState.tableauPiles[i];
+        for (let j = 0; j < pile.length; j++) {
+          if (!pile[j].faceUp) {
+            sourcePileIndex = i;
+            sourceCardIndex = j;
+            break;
+          }
+        }
+      }
+
+      if (sourcePileIndex !== -1 && sourceCardIndex !== -1) {
+        // Retirer la carte de la pioche si elle y est présente
+        const newStock = gameState.stock.filter(
+          stockCard => !(stockCard.suit === card.suit && stockCard.rank === card.rank)
+        );
+
+        // Retirer la carte de la défausse si elle y est présente
+        const newWaste = gameState.waste.filter(
+          wasteCard => !(wasteCard.suit === card.suit && wasteCard.rank === card.rank)
+        );
+
+        updateState({
+          stock: newStock,
+          waste: newWaste
+        });
+
+        setMagicMoveCard(card);
+        setMagicMoveTarget({ pileIndex: move.targetPile, card });
+        setMagicMoveSource({ pileIndex: sourcePileIndex, cardIndex: sourceCardIndex });
+        setShowMagicOverlay(true);
+      }
+    }
+  };
+
+  const handleMagicMoveComplete = () => {
+    if (magicMoveTarget && magicMoveSource) {
+      const { pileIndex: targetPileIndex, card } = magicMoveTarget;
+      const { pileIndex: sourcePileIndex, cardIndex: sourceCardIndex } = magicMoveSource;
+
+      const newTableauPiles = [...gameState.tableauPiles];
+      const sourcePile = [...newTableauPiles[sourcePileIndex]];
+      
+      // Retirer la carte face cachée
+      sourcePile.splice(sourceCardIndex, 1);
+      newTableauPiles[sourcePileIndex] = sourcePile;
+
+      // Ajouter la carte à la fondation
+      const newFoundationPiles = [...gameState.foundationPiles];
+      newFoundationPiles[targetPileIndex] = [...newFoundationPiles[targetPileIndex], card];
+
+      updateState({
+        tableauPiles: newTableauPiles,
+        foundationPiles: newFoundationPiles,
+        score: gameState.score + 10,
+        moves: gameState.moves + 1
+      });
+
+      setShowMagicOverlay(false);
+      setMagicMoveTarget(null);
+      setMagicMoveSource(null);
+      playCardMove();
+    }
+  };
+
+  const getNextRank = (currentRank: Rank): Rank | null => {
+    const ranks: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const currentIndex = ranks.indexOf(currentRank);
+    return currentIndex < ranks.length - 1 ? ranks[currentIndex + 1] : null;
+  };
+
+  const handleMagicWand = () => {
+    baguetteMagique();
+  };
+
+  const handleDrawCard = () => {
     if (isDrawing || isRecycling) return;
     setIsDrawing(true);
 
@@ -289,10 +415,17 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
     setDraggedCards(null);
   };
 
+  const isCardHighlighted = (sourceType: string, sourceIndex: number, cardIndex: number) => {
+    if (!highlightedMove) return false;
+    
+    return highlightedMove.from.type === sourceType &&
+           highlightedMove.from.index === sourceIndex &&
+           (highlightedMove.from.cardIndex === undefined || 
+            highlightedMove.from.cardIndex === cardIndex);
+  };
+
   const renderWasteCards = () => {
-    const allCards = gameState.waste;
-    const startIndex = Math.max(0, allCards.length - 3);
-    const visibleCards = allCards.slice(startIndex);
+    const visibleCards = gameState.waste.slice(-3);
     const positions = {
       0: { x: 0, zIndex: 0 },
       1: { x: 24, zIndex: 1 },
@@ -305,11 +438,14 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
           {visibleCards.map((card, index) => {
             const position = positions[index as keyof typeof positions];
             const isTopCard = index === visibleCards.length - 1;
-            const wasteIndex = startIndex + index;
+            const wasteIndex = gameState.waste.length - visibleCards.length + index;
+            const isHighlighted = highlightedMove?.from.type === 'waste' && 
+                                highlightedMove.from.index === 0 &&
+                                wasteIndex === gameState.waste.length - 1;
 
             return (
               <motion.div
-                key={`${card.suit}-${card.rank}-${wasteIndex}`}
+                key={`${card.suit}-${card.rank}-${gameState.waste.indexOf(card)}`}
                 initial={{ 
                   x: -100,
                   opacity: 0,
@@ -350,6 +486,7 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
                   style={customization.cardStyle}
                   cardBack={customization.cardBack}
                   isGrayed={!isTopCard}
+                  isHighlighted={isHighlighted}
                 />
               </motion.div>
             );
@@ -357,6 +494,12 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
         </AnimatePresence>
       </div>
     );
+  };
+
+  const canAcceptKing = (draggedCards: { cards: Card[] } | null): boolean => {
+    if (!draggedCards) return false;
+    const [firstCard] = draggedCards.cards;
+    return firstCard.rank === 'K';
   };
 
   return (
@@ -368,16 +511,15 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
         canUndo={canUndo}
         onUndo={undo}
         onHint={showHint}
-        onMagicWand={() => {}}
+        onMagicWand={handleMagicWand}
         hasMagicMove={findValidMoves(gameState).some(move => move.to.type === 'foundation')}
       />
 
       <div className="p-4">
-        {/* Stock and Waste Piles */}
         <div className="grid grid-cols-7 gap-2 mb-8">
           <div className="col-span-2 flex gap-2">
             <div 
-              onClick={handleDeckClick}
+              onClick={handleDrawCard}
               className={`
                 w-20 h-32 rounded-lg border-2 border-dashed flex items-center justify-center
                 ${gameState.stock.length > 0 
@@ -412,20 +554,25 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
                 style={customization.cardStyle}
                 cardBack={customization.cardBack}
                 draggable={pile.length > 0}
-                isHighlighted={highlightedMove?.to.type === 'foundation' && highlightedMove.to.index === index}
+                isHighlighted={isCardHighlighted('foundation', index, pile.length - 1)}
               />
             </div>
           ))}
         </div>
 
-        {/* Tableau Piles */}
         <div className="grid grid-cols-7 gap-2">
           {gameState.tableauPiles.map((pile, pileIndex) => (
             <div 
               key={`tableau-${pileIndex}`}
               className={`
                 col-span-1 flex flex-col min-h-[8rem]
-                ${pile.length === 0 ? 'border-2 border-dashed border-emerald-400/10 rounded-lg w-20' : ''}
+                ${pile.length === 0 ? `
+                  border-2 border-dashed rounded-lg w-20 transition-colors
+                  ${canAcceptKing(draggedCards) 
+                    ? 'border-emerald-400/40 bg-emerald-800/30' 
+                    : 'border-emerald-400/10'
+                  }
+                ` : ''}
               `}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, 'tableau', pileIndex)}
@@ -444,6 +591,9 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
                   }
                 }
 
+                const isMagicMoveSource = magicMoveSource?.pileIndex === pileIndex && 
+                                        magicMoveSource?.cardIndex === cardIndex;
+
                 return (
                   <div 
                     key={`card-${pileIndex}-${cardIndex}`}
@@ -451,8 +601,9 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
                       marginTop,
                       position: 'relative',
                       zIndex: cardIndex,
-                      opacity: draggedCards?.sourceIndex === pileIndex && 
-                              cardIndex >= draggedCards.cardIndex ? 0.3 : 1
+                      opacity: (draggedCards?.sourceType === 'tableau' && 
+                              draggedCards.sourceIndex === pileIndex && 
+                              cardIndex >= draggedCards.cardIndex) || isMagicMoveSource ? 0.3 : 1
                     }}
                   >
                     <CardComponent 
@@ -471,9 +622,8 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
                       style={customization.cardStyle}
                       cardBack={customization.cardBack}
                       isTableau={true}
-                      isHighlighted={highlightedMove?.from.type === 'tableau' && 
-                                   highlightedMove.from.index === pileIndex &&
-                                   highlightedMove.from.cardIndex === cardIndex}
+                      isHighlighted={isCardHighlighted('tableau', pileIndex, cardIndex)}
+                      isMagicMove={isMagicMoveSource}
                     />
                   </div>
                 );
@@ -483,78 +633,10 @@ export function KlondikeGame({ mode = 'draw-1', customization }: KlondikeGamePro
         </div>
       </div>
 
-      {/* Win Modal */}
-      <AnimatePresence>
-        {gameState.isComplete && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl p-8 max-w-md w-full mx-4"
-            >
-              <motion.div
-                initial={{ rotate: -180, scale: 0 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{ type: "spring" }}
-                className="flex items-center justify-center mb-6"
-              >
-                <Trophy className="w-16 h-16 text-yellow-400" />
-              </motion.div>
-              <h2 className="text-2xl font-bold text-center mb-4">Congratulations!</h2>
-              <p className="text-gray-600 text-center mb-6">
-                You've won with a score of {gameState.score}!
-              </p>
-              <div className="flex justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={startNewGame}
-                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors"
-                >
-                  Play Again
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <MagicMoveOverlay
         isVisible={showMagicOverlay}
         card={magicMoveCard}
-        onAnimationComplete={() => {
-          if (magicMoveTarget && magicMoveSource) {
-            const { pileIndex: targetPileIndex, card } = magicMoveTarget;
-            const { pileIndex: sourcePileIndex, cardIndex: sourceCardIndex } = magicMoveSource;
-
-            const newTableauPiles = [...gameState.tableauPiles];
-            const sourcePile = [...newTableauPiles[sourcePileIndex]];
-            
-            sourcePile.splice(sourceCardIndex, 1);
-            newTableauPiles[sourcePileIndex] = sourcePile;
-
-            const newFoundationPiles = [...gameState.foundationPiles];
-            newFoundationPiles[targetPileIndex] = [...newFoundationPiles[targetPileIndex], card];
-
-            updateState({
-              tableauPiles: newTableauPiles,
-              foundationPiles: newFoundationPiles,
-              score: gameState.score + 10,
-              moves: gameState.moves + 1
-            });
-
-            setShowMagicOverlay(false);
-            setMagicMoveTarget(null);
-            setMagicMoveSource(null);
-            playCardMove();
-          }
-        }}
+        onAnimationComplete={handleMagicMoveComplete}
       />
     </div>
   );

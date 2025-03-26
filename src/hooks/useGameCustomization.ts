@@ -1,22 +1,47 @@
-'use client';
+import { useEffect, useState } from "react";
+import { GameCustomization } from "@/types/customization";
 
-import { create } from 'zustand';
-import { GameCustomization } from '@/types/customization';
-
-interface GameCustomizationStore {
-  customization: GameCustomization;
-  updateCustomization: (updates: Partial<GameCustomization>) => void;
-}
+const STORAGE_KEY = "game-customization";
 
 const defaultCustomization: GameCustomization = {
-  cardBack: 'classic-red',
-  table: 'emerald-felt',
-  cardStyle: 'classic'
+  cardBack: "classic-red",
+  table: "emerald-felt",
+  cardStyle: "classic",
 };
 
-export const useGameCustomization = create<GameCustomizationStore>((set) => ({
-  customization: defaultCustomization,
-  updateCustomization: (updates) => set((state) => ({
-    customization: { ...state.customization, ...updates }
-  }))
-}));
+export function useGameCustomization() {
+  const [customization, setCustomization] =
+    useState<GameCustomization>(defaultCustomization);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load from localStorage once the component mounts (client-side only)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setCustomization(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  const updateCustomization = (updates: Partial<GameCustomization>) => {
+    const newCustomization = { ...customization, ...updates };
+    setCustomization(newCustomization);
+
+    // Only try to update localStorage if we're on the client
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newCustomization));
+    } catch (error) {
+      console.error("Error updating localStorage:", error);
+    }
+  };
+
+  return {
+    customization,
+    updateCustomization,
+    isLoaded,
+  };
+}

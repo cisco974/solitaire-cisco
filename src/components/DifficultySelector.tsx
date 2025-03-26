@@ -1,7 +1,5 @@
-'use client';
-
 import React from 'react';
-import { Difficulty } from '@/types/cards';
+import { Difficulty } from '../types/cards';
 
 interface DifficultySelectorProps {
   currentDifficulty: Difficulty;
