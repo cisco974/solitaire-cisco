@@ -1,4 +1,6 @@
-import { useCallback, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
 import {
   Difficulty,
   findValidMoves,
@@ -20,59 +22,65 @@ const defaultStats = {
   gamesWon: 0,
 };
 
-const getInitialState = (): GameState => {
-  const baseState = {
-    score: 0,
-    moves: 0,
-    startTime: Date.now(),
-    isComplete: false,
-    tableauPiles: Array(7).fill([]),
-    foundationPiles: Array(4).fill([]),
-    stock: [],
-    waste: [],
-    difficulty: "medium" as Difficulty,
-    mode: "draw-1" as KlondikeMode,
-    ...defaultStats,
-  };
-
-  const savedState = localStorage.getItem(STORAGE_KEY);
-  if (savedState) {
-    try {
-      const parsed = JSON.parse(savedState);
-      return {
-        ...baseState,
-        difficulty: parsed.difficulty || baseState.difficulty,
-        mode: parsed.mode || baseState.mode,
-        bestScores: parsed.bestScores || defaultStats.bestScores,
-        gamesPlayed: parsed.gamesPlayed || 0,
-        gamesWon: parsed.gamesWon || 0,
-      };
-    } catch (e) {
-      console.error("Error parsing saved state:", e);
-      return baseState;
-    }
-  }
-
-  return baseState;
+// État par défaut sans localStorage
+const defaultState: GameState = {
+  score: 0,
+  moves: 0,
+  startTime: Date.now(),
+  isComplete: false,
+  tableauPiles: Array(7).fill([]),
+  foundationPiles: Array(4).fill([]),
+  stock: [],
+  waste: [],
+  difficulty: "medium" as Difficulty,
+  mode: "draw-1" as KlondikeMode,
+  ...defaultStats,
 };
 
 export function useGameState() {
-  const [gameState, setGameState] = useState<GameState>(getInitialState);
+  // Initialiser avec l'état par défaut
+  const [gameState, setGameState] = useState<GameState>(defaultState);
   const [history, setHistory] = useState<GameAction[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [highlightedMove, setHighlightedMove] = useState<ValidMove | null>(
     null,
   );
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Charger les données depuis localStorage uniquement côté client
+  useEffect(() => {
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        setGameState((prevState) => ({
+          ...prevState,
+          difficulty: parsed.difficulty || prevState.difficulty,
+          mode: parsed.mode || prevState.mode,
+          bestScores: parsed.bestScores || defaultStats.bestScores,
+          gamesPlayed: parsed.gamesPlayed || 0,
+          gamesWon: parsed.gamesWon || 0,
+        }));
+      }
+    } catch (e) {
+      console.error("Error loading state from localStorage:", e);
+    }
+    setIsInitialized(true);
+  }, []);
 
   const saveState = useCallback((state: GameState) => {
-    const stateToSave = {
-      difficulty: state.difficulty,
-      mode: state.mode,
-      bestScores: state.bestScores,
-      gamesPlayed: state.gamesPlayed,
-      gamesWon: state.gamesWon,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    try {
+      const stateToSave = {
+        difficulty: state.difficulty,
+        mode: state.mode,
+        bestScores: state.bestScores,
+        gamesPlayed: state.gamesPlayed,
+        gamesWon: state.gamesWon,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    } catch (e) {
+      console.error("Error saving to localStorage:", e);
+    }
   }, []);
 
   const updateState = useCallback(
@@ -210,6 +218,7 @@ export function useGameState() {
     setMode,
     updateStats,
     canUndo: historyIndex >= 0,
+    isInitialized,
   };
 }
 

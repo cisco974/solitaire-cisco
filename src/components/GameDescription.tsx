@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { Trophy, Sparkles, Brain, Zap, Target, Star, Award, ChevronDown, ChevronUp } from 'lucide-react';
+"use client";
+import React, { useState } from "react";
+import {
+  Award,
+  Brain,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Star,
+  Target,
+  Trophy,
+} from "lucide-react";
 
 interface GameDescriptionProps {
-  gameType: 'klondike' | 'spider' | 'freecell';
+  gameType: "klondike" | "spider" | "freecell";
 }
 
 export function GameDescription({ gameType }: GameDescriptionProps) {
@@ -12,104 +22,119 @@ export function GameDescription({ gameType }: GameDescriptionProps) {
 
   const gameData = {
     klondike: {
-      title: 'Classic Solitaire',
-      subtitle: 'The World\'s Most Popular Card Game',
+      title: "Classic Solitaire",
+      subtitle: "The World's Most Popular Card Game",
       overview: {
-        title: 'Master the Classic',
+        title: "Master the Classic",
         icon: Trophy,
-        description: 'Experience the timeless appeal of Klondike Solitaire, where strategy meets luck in perfect harmony. Build foundation piles from Ace to King while managing your resources and planning ahead.'
+        description:
+          "Experience the timeless appeal of Klondike Solitaire, where strategy meets luck in perfect harmony. Build foundation piles from Ace to King while managing your resources and planning ahead.",
       },
       features: [
-        'Draw 1 or 3 cards mode for different challenge levels',
-        'Smart auto-complete feature for endgame optimization',
-        'Unlimited undos to perfect your strategy',
-        'Multiple scoring systems for competitive play'
+        "Draw 1 or 3 cards mode for different challenge levels",
+        "Smart auto-complete feature for endgame optimization",
+        "Unlimited undos to perfect your strategy",
+        "Multiple scoring systems for competitive play",
       ],
       howToPlay: [
         {
-          title: 'Setup',
-          description: 'The game begins with seven tableau piles, with the top card of each pile face up. The remaining cards form the stock pile.'
+          title: "Setup",
+          description:
+            "The game begins with seven tableau piles, with the top card of each pile face up. The remaining cards form the stock pile.",
         },
         {
-          title: 'Building Rules',
-          description: 'Create descending sequences with alternating colors in the tableau. Build foundation piles up from Ace to King in each suit.'
+          title: "Building Rules",
+          description:
+            "Create descending sequences with alternating colors in the tableau. Build foundation piles up from Ace to King in each suit.",
         },
         {
-          title: 'Stock Usage',
-          description: 'Draw cards from the stock when you need them. The stock can be recycled when depleted, giving you multiple chances to win.'
+          title: "Stock Usage",
+          description:
+            "Draw cards from the stock when you need them. The stock can be recycled when depleted, giving you multiple chances to win.",
         },
         {
-          title: 'Victory',
-          description: 'Complete all four foundation piles to win. Use the auto-complete feature when all cards are face up for a quick finish.'
-        }
-      ]
+          title: "Victory",
+          description:
+            "Complete all four foundation piles to win. Use the auto-complete feature when all cards are face up for a quick finish.",
+        },
+      ],
     },
     spider: {
-      title: 'Spider Solitaire',
-      subtitle: 'A Web of Strategic Possibilities',
+      title: "Spider Solitaire",
+      subtitle: "A Web of Strategic Possibilities",
       overview: {
-        title: 'Eight-Suit Challenge',
+        title: "Eight-Suit Challenge",
         icon: Target,
-        description: 'Dive into Spider Solitaire, where mastering multiple suits and complex sequences leads to victory. Choose your difficulty level and test your skills against one of solitaire\'s most engaging variants.'
+        description:
+          "Dive into Spider Solitaire, where mastering multiple suits and complex sequences leads to victory. Choose your difficulty level and test your skills against one of solitaire's most engaging variants.",
       },
       features: [
-        'Three difficulty modes: 1, 2, or 4 suits',
-        'Progressive dealing system for dynamic gameplay',
-        'In-game move suggestions and hints',
-        'Advanced scoring based on efficiency'
+        "Three difficulty modes: 1, 2, or 4 suits",
+        "Progressive dealing system for dynamic gameplay",
+        "In-game move suggestions and hints",
+        "Advanced scoring based on efficiency",
       ],
       howToPlay: [
         {
-          title: 'Initial Layout',
-          description: 'Start with ten tableau piles and multiple decks. The number of suits in play determines the game\'s complexity.'
+          title: "Initial Layout",
+          description:
+            "Start with ten tableau piles and multiple decks. The number of suits in play determines the game's complexity.",
         },
         {
-          title: 'Sequence Building',
-          description: 'Create descending sequences regardless of suit. Moving grouped cards requires them to be of the same suit.'
+          title: "Sequence Building",
+          description:
+            "Create descending sequences regardless of suit. Moving grouped cards requires them to be of the same suit.",
         },
         {
-          title: 'Dealing New Cards',
-          description: 'When stuck, deal a new card to each tableau pile. Plan carefully as all cards must be dealt to win.'
+          title: "Dealing New Cards",
+          description:
+            "When stuck, deal a new card to each tableau pile. Plan carefully as all cards must be dealt to win.",
         },
         {
-          title: 'Completing Sequences',
-          description: 'Remove completed suit sequences (King to Ace) automatically. Complete eight sequences to win the game.'
-        }
-      ]
+          title: "Completing Sequences",
+          description:
+            "Remove completed suit sequences (King to Ace) automatically. Complete eight sequences to win the game.",
+        },
+      ],
     },
     freecell: {
-      title: 'FreeCell Solitaire',
-      subtitle: 'Pure Strategy, Perfect Challenge',
+      title: "FreeCell Solitaire",
+      subtitle: "Pure Strategy, Perfect Challenge",
       overview: {
-        title: 'Strategic Mastery',
+        title: "Strategic Mastery",
         icon: Star,
-        description: 'Welcome to FreeCell, where every game is solvable and victory depends purely on skill. With all cards visible from the start, plan your moves carefully and use the free cells wisely.'
+        description:
+          "Welcome to FreeCell, where every game is solvable and victory depends purely on skill. With all cards visible from the start, plan your moves carefully and use the free cells wisely.",
       },
       features: [
-        'All cards visible from the start',
-        'Four free cells for temporary storage',
-        'Multiple difficulty levels',
-        'Advanced move validation system'
+        "All cards visible from the start",
+        "Four free cells for temporary storage",
+        "Multiple difficulty levels",
+        "Advanced move validation system",
       ],
       howToPlay: [
         {
-          title: 'Free Cell Usage',
-          description: 'Use the four free cells as temporary storage to create new opportunities and solve complex situations.'
+          title: "Free Cell Usage",
+          description:
+            "Use the four free cells as temporary storage to create new opportunities and solve complex situations.",
         },
         {
-          title: 'Moving Rules',
-          description: 'The number of cards you can move depends on available free cells and empty columns. Plan your moves carefully.'
+          title: "Moving Rules",
+          description:
+            "The number of cards you can move depends on available free cells and empty columns. Plan your moves carefully.",
         },
         {
-          title: 'Building Strategy',
-          description: 'Create descending sequences with alternating colors in the tableau. Build foundation piles up from Ace to King.'
+          title: "Building Strategy",
+          description:
+            "Create descending sequences with alternating colors in the tableau. Build foundation piles up from Ace to King.",
         },
         {
-          title: 'Winning Approach',
-          description: 'Clear all cards to the foundation piles to win. Every game can be solved with the right strategy.'
-        }
-      ]
-    }
+          title: "Winning Approach",
+          description:
+            "Clear all cards to the foundation piles to win. Every game can be solved with the right strategy.",
+        },
+      ],
+    },
   };
 
   const game = gameData[gameType];
@@ -185,7 +210,9 @@ export function GameDescription({ gameType }: GameDescriptionProps) {
           >
             <div className="flex items-center gap-2">
               <Award className="w-5 h-5 text-emerald-600" />
-              <span className="font-medium text-gray-900">Game Terminology</span>
+              <span className="font-medium text-gray-900">
+                Game Terminology
+              </span>
             </div>
             {showTerminology ? (
               <ChevronUp className="w-5 h-5 text-gray-400" />
@@ -240,9 +267,10 @@ export function GameDescription({ gameType }: GameDescriptionProps) {
           {showHistory && (
             <div className="px-6 py-4 bg-white/30">
               <p className="text-gray-600">
-                The game originated in the late 18th century and gained widespread popularity
-                through its inclusion in Microsoft Windows in the 1990s. It has since become
-                one of the most played computer games in history.
+                The game originated in the late 18th century and gained
+                widespread popularity through its inclusion in Microsoft Windows
+                in the 1990s. It has since become one of the most played
+                computer games in history.
               </p>
             </div>
           )}

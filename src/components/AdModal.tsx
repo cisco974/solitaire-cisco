@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+"use client";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface AdModalProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export function AdModal({ isOpen, onClose }: AdModalProps) {
     let timer: NodeJS.Timeout;
     if (isWatching && countdown > 0) {
       timer = setInterval(() => {
-        setCountdown(prev => prev - 1);
+        setCountdown((prev) => prev - 1);
       }, 1000);
     }
     return () => {
@@ -54,7 +54,9 @@ export function AdModal({ isOpen, onClose }: AdModalProps) {
           >
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold mb-2">Need Help?</h2>
-              <p className="text-gray-600">Watch a short ad to get an extra move credit!</p>
+              <p className="text-gray-600">
+                Watch a short ad to get an extra move credit!
+              </p>
             </div>
 
             <div className="bg-gray-100 rounded-lg p-8 mb-6">
@@ -69,13 +71,14 @@ export function AdModal({ isOpen, onClose }: AdModalProps) {
                 disabled={countdown > 0}
                 className={`
                   px-6 py-3 rounded-lg transition-colors relative
-                  ${countdown > 0
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  ${
+                    countdown > 0
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-emerald-600 hover:bg-emerald-500 text-white"
                   }
                 `}
               >
-                <span>Close {countdown > 0 ? `(${countdown})` : ''}</span>
+                <span>Close {countdown > 0 ? `(${countdown})` : ""}</span>
               </button>
             </div>
           </motion.div>

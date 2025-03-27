@@ -1,7 +1,6 @@
-'use client'
+"use client";
+import { SpiderPage } from "@/pages/SpiderPage";
 
-import { SpiderPage } from '@/components/pages/SpiderPage'
-
-export default function SpiderSolitaire() {
-  return <SpiderPage />
+export default function Home() {
+  return <SpiderPage />;
 }

@@ -1,14 +1,15 @@
+"use client";
 import { useState } from "react";
 import { BarChart as ChartBar, Menu, Settings2, Share2 } from "lucide-react";
-import { FreeCell } from "../components/FreeCell";
-import { CustomizationPanel } from "../components/CustomizationPanel";
-import { GameDescription } from "../components/GameDescription";
-import { FreeCellContent } from "../components/FreeCellContent";
-import { ShareModal } from "../components/ShareModal";
-import { StatsModal } from "../components/StatsModal";
-import NewGameModal from "../components/NewGameModal";
-import { useGameCustomization } from "../hooks/useGameCustomization";
-import { tableStyles } from "../types/customization";
+import { FreeCell } from "@/components/FreeCell";
+import { CustomizationPanel } from "@/components/CustomizationPanel";
+import { GameDescription } from "@/components/GameDescription";
+import { FreeCellContent } from "@/components/FreeCellContent";
+import { ShareModal } from "@/components/ShareModal";
+import { StatsModal } from "@/components/StatsModal";
+import NewGameModal from "@/components/NewGameModal";
+import { useGameCustomization } from "@/hooks/useGameCustomization";
+import { tableStyles } from "@/types/customization";
 import Link from "next/link";
 
 export function FreeCellPage() {
@@ -44,7 +45,7 @@ export function FreeCellPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Logo */}
-              <Link to="/" className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center space-x-4">
                 <div className="hidden sm:flex space-x-1">
                   <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">
                     ♥
@@ -69,19 +70,19 @@ export function FreeCellPage() {
               {/* Game Mode Tabs */}
               <div className="hidden md:flex space-x-1">
                 <Link
-                  to="/"
+                  href="/"
                   className="px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
                 >
                   Klondike
                 </Link>
                 <Link
-                  to="/spider"
+                  href="/spider"
                   className="px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
                 >
                   Spider
                 </Link>
                 <Link
-                  to="/freecell"
+                  href="/freecell"
                   className="px-4 py-2 rounded-lg bg-white/20 text-white"
                 >
                   FreeCell
@@ -137,19 +138,19 @@ export function FreeCellPage() {
           {mobileMenuOpen && (
             <div className="md:hidden pt-4 pb-2 space-y-1">
               <Link
-                to="/"
+                href="/"
                 className="block w-full text-left px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
               >
                 Klondike
               </Link>
               <Link
-                to="/spider"
+                href="/spider"
                 className="block w-full text-left px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
               >
                 Spider
               </Link>
               <Link
-                to="/freecell"
+                href="/freecell"
                 className="block w-full text-left px-4 py-2 rounded-lg bg-white/20 text-white"
               >
                 FreeCell

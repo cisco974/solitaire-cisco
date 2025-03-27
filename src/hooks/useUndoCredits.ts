@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+"use client";
+import { useCallback, useState } from "react";
 
 const UNDOS_PER_GAME = 3;
 
@@ -10,37 +11,37 @@ interface UndoState {
 export function useUndoCredits() {
   const [state, setState] = useState<UndoState>({
     undosRemaining: UNDOS_PER_GAME,
-    showAdModal: false
+    showAdModal: false,
   });
 
   const useUndo = useCallback(() => {
     if (state.undosRemaining > 0) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        undosRemaining: prev.undosRemaining - 1
+        undosRemaining: prev.undosRemaining - 1,
       }));
       return true;
     }
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      showAdModal: true
+      showAdModal: true,
     }));
     return false;
   }, [state.undosRemaining]);
 
   const closeAdModal = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       showAdModal: false,
       // Add one undo credit after watching the ad
-      undosRemaining: prev.undosRemaining + 1
+      undosRemaining: prev.undosRemaining + 1,
     }));
   }, []);
 
   const resetUndos = useCallback(() => {
     setState({
       undosRemaining: UNDOS_PER_GAME,
-      showAdModal: false
+      showAdModal: false,
     });
   }, []);
 
@@ -50,6 +51,6 @@ export function useUndoCredits() {
     canUseUndo: state.undosRemaining > 0,
     useUndo,
     closeAdModal,
-    resetUndos
+    resetUndos,
   };
 }

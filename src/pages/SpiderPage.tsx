@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { Settings2, Menu, Share2, BarChart as ChartBar } from 'lucide-react';
-import { SpiderSolitaire } from '../components/SpiderSolitaire';
-import { CustomizationPanel } from '../components/CustomizationPanel';
-import { GameDescription } from '../components/GameDescription';
-import { SpiderContent } from '../components/SpiderContent';
-import { ShareModal } from '../components/ShareModal';
-import { StatsModal } from '../components/StatsModal';
-import NewGameModal from '../components/NewGameModal';
-import { useGameCustomization } from '../hooks/useGameCustomization';
-import { tableStyles } from '../types/customization';
-import { SpiderMode } from '../types/spiderCards';
-import { Link } from 'react-router-dom';
+"use client";
+import React, { useState } from "react";
+import { BarChart as ChartBar, Menu, Settings2, Share2 } from "lucide-react";
+import { SpiderSolitaire } from "@components/SpiderSolitaire";
+import { CustomizationPanel } from "@components/CustomizationPanel";
+import { GameDescription } from "@components/GameDescription";
+import { SpiderContent } from "@components/SpiderContent";
+import { ShareModal } from "@components/ShareModal";
+import { StatsModal } from "@components/StatsModal";
+import NewGameModal from "@components/NewGameModal";
+import { useGameCustomization } from "@/hooks/useGameCustomization";
+import { tableStyles } from "@/types/customization";
+import { SpiderMode } from "@/types/spiderCards";
+import Link from "next/link";
 
 export function SpiderPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,14 +21,19 @@ export function SpiderPage() {
   const [newGameModalOpen, setNewGameModalOpen] = useState(false);
   const { customization, updateCustomization } = useGameCustomization();
   const [gameKey, setGameKey] = useState(0);
-  const [spiderMode, setSpiderMode] = useState<SpiderMode>('1-suit');
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [spiderMode, setSpiderMode] = useState<SpiderMode>("1-suit");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
+    "medium",
+  );
 
-  const handleNewGame = (mode: string, newDifficulty: 'easy' | 'medium' | 'hard') => {
+  const handleNewGame = (
+    mode: string,
+    newDifficulty: "easy" | "medium" | "hard",
+  ) => {
     setSpiderMode(mode as SpiderMode);
     setDifficulty(newDifficulty);
     setNewGameModalOpen(false);
-    setGameKey(prev => prev + 1);
+    setGameKey((prev) => prev + 1);
   };
 
   const currentTableStyle = tableStyles[customization.table];
@@ -35,19 +41,31 @@ export function SpiderPage() {
   return (
     <div className="flex-1">
       {/* Header */}
-      <header className={`bg-gradient-to-br ${currentTableStyle.gradient} border-b border-white/10`}>
+      <header
+        className={`bg-gradient-to-br ${currentTableStyle.gradient} border-b border-white/10`}
+      >
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Logo */}
-              <Link to="/" className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center space-x-4">
                 <div className="hidden sm:flex space-x-1">
-                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">♥</div>
-                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">♦</div>
-                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-gray-900 shadow-lg">♠</div>
-                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-gray-900 shadow-lg">♣</div>
+                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">
+                    ♥
+                  </div>
+                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-red-600 shadow-lg">
+                    ♦
+                  </div>
+                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-gray-900 shadow-lg">
+                    ♠
+                  </div>
+                  <div className="w-8 h-10 bg-white rounded-md flex items-center justify-center text-gray-900 shadow-lg">
+                    ♣
+                  </div>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-bold text-white">SLTR.com</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                  SLTR.com
+                </h1>
               </Link>
             </div>
 
@@ -55,19 +73,19 @@ export function SpiderPage() {
               {/* Game Mode Tabs */}
               <div className="hidden md:flex space-x-1">
                 <Link
-                  to="/"
+                  href="/"
                   className="px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
                 >
                   Klondike
                 </Link>
                 <Link
-                  to="/spider"
+                  href="/spider"
                   className="px-4 py-2 rounded-lg bg-white/20 text-white"
                 >
                   Spider
                 </Link>
                 <Link
-                  to="/freecell"
+                  href="/freecell"
                   className="px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
                 >
                   FreeCell
@@ -110,7 +128,7 @@ export function SpiderPage() {
               </button>
 
               {/* Mobile menu button */}
-              <button 
+              <button
                 className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
@@ -123,19 +141,19 @@ export function SpiderPage() {
           {mobileMenuOpen && (
             <div className="md:hidden pt-4 pb-2 space-y-1">
               <Link
-                to="/"
+                href="/"
                 className="block w-full text-left px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
               >
                 Klondike
               </Link>
               <Link
-                to="/spider"
+                href="/spider"
                 className="block w-full text-left px-4 py-2 rounded-lg bg-white/20 text-white"
               >
                 Spider
               </Link>
               <Link
-                to="/freecell"
+                href="/freecell"
                 className="block w-full text-left px-4 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
               >
                 FreeCell
@@ -150,9 +168,11 @@ export function SpiderPage() {
         <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
           <div className="rounded-xl p-2 sm:p-6 relative overflow-hidden">
             <div className={`absolute inset-0 ${currentTableStyle.pattern}`} />
-            <div className={`absolute inset-0 bg-gradient-to-br ${currentTableStyle.gradient}`} />
+            <div
+              className={`absolute inset-0 bg-gradient-to-br ${currentTableStyle.gradient}`}
+            />
             <div className="relative z-10">
-              <SpiderSolitaire 
+              <SpiderSolitaire
                 key={`spider-${gameKey}`}
                 customization={customization}
                 mode={spiderMode}
@@ -188,15 +208,15 @@ export function SpiderPage() {
           tableauPiles: [],
           foundationPiles: [],
           stock: [],
-          difficulty: 'medium',
-          mode: '1-suit',
+          difficulty: "medium",
+          mode: "1-suit",
           bestScores: {
             beginner: 0,
             medium: 0,
-            expert: 0
+            expert: 0,
           },
           gamesPlayed: 0,
-          gamesWon: 0
+          gamesWon: 0,
         }}
       />
 

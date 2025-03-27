@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card as CardComponent } from './Card';
-import { DifficultySelector } from './DifficultySelector';
-import { GameTopbar } from './GameTopbar';
-import { FoundationPile } from './FoundationPile';
-import { Card, isPartOfDescendingSequence } from '../types/cards';
-import { SpiderGameState, SpiderDifficulty, isValidSpiderTableauMove, isValidSpiderFoundationMove, checkSpiderWinCondition } from '../types/spiderCards';
-import { Trophy } from 'lucide-react';
-import { useSoundEffects } from '../hooks/useSoundEffects';
-import { useSpiderGameState } from '../hooks/useSpiderGameState';
-import { GameCustomization } from '../types/customization';
+"use client";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Card as CardComponent } from "./Card";
+import { DifficultySelector } from "./DifficultySelector";
+import { GameTopbar } from "./GameTopbar";
+import { FoundationPile } from "./FoundationPile";
+import { Card, isPartOfDescendingSequence } from "@/types/cards";
+import {
+  checkSpiderWinCondition,
+  isValidSpiderFoundationMove,
+  isValidSpiderTableauMove,
+  SpiderDifficulty,
+  SpiderGameState,
+} from "@/types/spiderCards";
+import { Trophy } from "lucide-react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useSpiderGameState } from "@/hooks/useSpiderGameState";
+import { GameCustomization } from "@/types/customization";
 
 interface SpiderSolitaireProps {
-  mode?: 'draw-1' | 'draw-3';
+  mode?: "draw-1" | "draw-3";
   customization: GameCustomization;
 }
 
@@ -25,17 +32,20 @@ function shuffle(array: Card[]): Card[] {
   return newArray;
 }
 
-export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolitaireProps) {
-  const { 
-    gameState, 
-    updateState, 
-    addMove, 
-    undo, 
-    redo, 
-    canUndo, 
+export function SpiderSolitaire({
+  mode = "1-suit",
+  customization,
+}: SpiderSolitaireProps) {
+  const {
+    gameState,
+    updateState,
+    addMove,
+    undo,
+    redo,
+    canUndo,
     canRedo,
     setDifficulty,
-    updateStats
+    updateStats,
   } = useSpiderGameState();
   const [draggedCards, setDraggedCards] = useState<{
     cards: Card[];
@@ -56,7 +66,7 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
       playWin();
       updateState({
         isComplete: true,
-        score: calculateScore(gameState)
+        score: calculateScore(gameState),
       });
       updateStats(true);
     }
@@ -73,17 +83,33 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
   }, [gameState.startTime, gameState.isComplete]);
 
   function createSpiderDeck(): Card[] {
-    const suits = 
-      mode === '1-suit' ? ['♠']
-      : mode === '2-suits' ? ['♠', '♥']
-      : ['♠', '♥', '♦', '♣'];
+    const suits =
+      mode === "1-suit"
+        ? ["♠"]
+        : mode === "2-suits"
+          ? ["♠", "♥"]
+          : ["♠", "♥", "♦", "♣"];
 
-    const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const ranks = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+    ];
     const deck: Card[] = [];
 
     // Add appropriate number of decks based on mode
     const numDecks = 8 / suits.length;
-    
+
     for (let d = 0; d < numDecks; d++) {
       for (const suit of suits) {
         for (const rank of ranks) {
@@ -97,13 +123,16 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
 
   function startNewGame() {
     const deck = createSpiderDeck();
-    const newTableauPiles: Card[][] = Array(10).fill([]).map(() => []);
-    
+    const newTableauPiles: Card[][] = Array(10)
+      .fill([])
+      .map(() => []);
+
     // Deal initial cards
     for (let i = 0; i < 54; i++) {
       const pileIndex = i % 10;
       const card = deck.pop()!;
-      if (i >= 44) { // Last cards in each pile are face up
+      if (i >= 44) {
+        // Last cards in each pile are face up
         card.faceUp = true;
       }
       newTableauPiles[pileIndex] = [...newTableauPiles[pileIndex], card];
@@ -122,7 +151,7 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
       score: 0,
       moves: 0,
       startTime: Date.now(),
-      isComplete: false
+      isComplete: false,
     });
   }
 
@@ -148,7 +177,7 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
           updateState({
             tableauPiles: newTableauPiles,
             stock: gameState.stock.slice(0, -1),
-            moves: gameState.moves + 1
+            moves: gameState.moves + 1,
           });
           setIsDealing(false);
         }
@@ -160,14 +189,14 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
     e: React.DragEvent,
     cards: Card[],
     sourceIndex: number,
-    cardIndex: number
+    cardIndex: number,
   ) => {
     if (!e.dataTransfer) return;
-    
+
     setDraggedCards({
       cards,
       sourceIndex,
-      cardIndex
+      cardIndex,
     });
     playCardMove();
   };
@@ -175,17 +204,17 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.dropEffect = "move";
     }
   };
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
-    
+
     if (!draggedCards) return;
-    
+
     const { cards, sourceIndex, cardIndex } = draggedCards;
-    
+
     // Validate move
     if (!isValidSpiderTableauMove(cards, gameState.tableauPiles[targetIndex])) {
       playError();
@@ -194,11 +223,16 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
     }
 
     const newTableauPiles = [...gameState.tableauPiles];
-    
+
     // Remove cards from source
-    newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(0, cardIndex);
+    newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(
+      0,
+      cardIndex,
+    );
     if (newTableauPiles[sourceIndex].length > 0) {
-      newTableauPiles[sourceIndex][newTableauPiles[sourceIndex].length - 1].faceUp = true;
+      newTableauPiles[sourceIndex][
+        newTableauPiles[sourceIndex].length - 1
+      ].faceUp = true;
     }
 
     // Add cards to target
@@ -212,42 +246,44 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
         // Remove sequence and add to foundation
         newTableauPiles[targetIndex] = targetPile.slice(0, -13);
         if (newTableauPiles[targetIndex].length > 0) {
-          newTableauPiles[targetIndex][newTableauPiles[targetIndex].length - 1].faceUp = true;
+          newTableauPiles[targetIndex][
+            newTableauPiles[targetIndex].length - 1
+          ].faceUp = true;
         }
         updateState({
           tableauPiles: newTableauPiles,
           foundationPiles: [...gameState.foundationPiles, sequence],
           score: gameState.score + 100,
-          moves: gameState.moves + 1
+          moves: gameState.moves + 1,
         });
         playCardMove();
       } else {
         updateState({
           tableauPiles: newTableauPiles,
           score: gameState.score + 5,
-          moves: gameState.moves + 1
+          moves: gameState.moves + 1,
         });
       }
     } else {
       updateState({
         tableauPiles: newTableauPiles,
         score: gameState.score + 5,
-        moves: gameState.moves + 1
+        moves: gameState.moves + 1,
       });
     }
 
     addMove({
-      type: 'move',
+      type: "move",
       from: {
-        type: 'tableau',
+        type: "tableau",
         index: sourceIndex,
-        cardIndex
+        cardIndex,
       },
       to: {
-        type: 'tableau',
-        index: targetIndex
+        type: "tableau",
+        index: targetIndex,
       },
-      cards
+      cards,
     });
 
     playCardMove();
@@ -265,32 +301,41 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
 
     return (
       <div className="flex">
-        {Array.from({ length: Math.min(gameState.stock.length, 5) }).map((_, index) => (
-          <div
-            key={`stock-card-${index}`}
-            className={`
+        {Array.from({ length: Math.min(gameState.stock.length, 5) }).map(
+          (_, index) => (
+            <div
+              key={`stock-card-${index}`}
+              className={`
               relative -ml-10 first:ml-0 transition-transform duration-200
-              ${index === gameState.stock.length - 1 ? 'hover:-translate-y-2 cursor-pointer' : ''}
+              ${index === gameState.stock.length - 1 ? "hover:-translate-y-2 cursor-pointer" : ""}
             `}
-            style={{
-              zIndex: index,
-            }}
-            onClick={index === gameState.stock.length - 1 ? handleDealCards : undefined}
-          >
-            <CardComponent 
-              card={{ suit: '♠', rank: 'A', faceUp: false }}
-              style={customization.cardStyle}
-              cardBack={customization.cardBack}
-              className="w-14 h-20"
-              variant="spider"
-            />
-          </div>
-        ))}
+              style={{
+                zIndex: index,
+              }}
+              onClick={
+                index === gameState.stock.length - 1
+                  ? handleDealCards
+                  : undefined
+              }
+            >
+              <CardComponent
+                card={{ suit: "♠", rank: "A", faceUp: false }}
+                style={customization.cardStyle}
+                cardBack={customization.cardBack}
+                className="w-14 h-20"
+                variant="spider"
+              />
+            </div>
+          ),
+        )}
       </div>
     );
   };
 
-  const isCardInValidSequence = (pileIndex: number, cardIndex: number): boolean => {
+  const isCardInValidSequence = (
+    pileIndex: number,
+    cardIndex: number,
+  ): boolean => {
     const pile = gameState.tableauPiles[pileIndex];
     if (cardIndex === pile.length - 1) return true;
     return isPartOfDescendingSequence(pile, cardIndex, true);
@@ -301,13 +346,13 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
       {/* Settings Modal */}
       <AnimatePresence>
         {showSettings && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -341,19 +386,19 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
       {/* Win Modal */}
       <AnimatePresence>
         {gameState.isComplete && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white rounded-xl p-8 max-w-md w-full mx-4"
             >
-              <motion.div 
+              <motion.div
                 initial={{ rotate: -180, scale: 0 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: "spring" }}
@@ -361,7 +406,9 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
               >
                 <Trophy className="w-16 h-16 text-yellow-400" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-center mb-4">Congratulations!</h2>
+              <h2 className="text-2xl font-bold text-center mb-4">
+                Congratulations!
+              </h2>
               <p className="text-gray-600 text-center mb-6">
                 You've won with a score of {gameState.score}!
               </p>
@@ -395,75 +442,82 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
         {/* Stock pile and Foundation piles */}
         <div className="grid grid-cols-10 gap-1 mb-6">
           {/* Stock pile in columns 1-2 */}
-          <div className="col-span-2">
-            {renderStockPile()}
-          </div>
+          <div className="col-span-2">{renderStockPile()}</div>
 
           {/* Foundation piles in columns 3-10 */}
-          {Array(8).fill(null).map((_, index) => {
-            const pile = gameState.foundationPiles[index] || [];
-            return (
-              <div key={`foundation-${index}`} className="col-span-1">
-                <FoundationPile
-                  pile={pile}
-                  className="w-14 h-20"
-                />
-              </div>
-            );
-          })}
+          {Array(8)
+            .fill(null)
+            .map((_, index) => {
+              const pile = gameState.foundationPiles[index] || [];
+              return (
+                <div key={`foundation-${index}`} className="col-span-1">
+                  <FoundationPile pile={pile} className="w-14 h-20" />
+                </div>
+              );
+            })}
         </div>
 
         {/* Tableau piles */}
         <div className="grid grid-cols-10 gap-1">
           {gameState.tableauPiles.map((pile, pileIndex) => (
-            <div 
+            <div
               key={`tableau-${pileIndex}`}
               className={`
                 col-span-1 flex flex-col min-h-[6rem]
-                ${pile.length === 0 ? 'border-2 border-dashed border-emerald-400/10 rounded-lg w-14' : ''}
+                ${pile.length === 0 ? "border-2 border-dashed border-emerald-400/10 rounded-lg w-14" : ""}
               `}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, pileIndex)}
             >
               {pile.map((card, cardIndex) => {
                 const prevCard = cardIndex > 0 ? pile[cardIndex - 1] : null;
-                let marginTop = '0';
-                
+                let marginTop = "0";
+
                 if (cardIndex > 0) {
                   if (!prevCard?.faceUp && !card.faceUp) {
-                    marginTop = '-4.5rem'; // Closed to closed
+                    marginTop = "-4.5rem"; // Closed to closed
                   } else if (!prevCard?.faceUp && card.faceUp) {
-                    marginTop = '-4.5rem'; // Closed to open
+                    marginTop = "-4.5rem"; // Closed to open
                   } else if (prevCard?.faceUp && card.faceUp) {
-                    marginTop = '-3.25rem'; // Open to open (adjusted from -3.5rem)
+                    marginTop = "-3.25rem"; // Open to open (adjusted from -3.5rem)
                   }
                 }
 
                 return (
-                  <div 
+                  <div
                     key={`card-${pileIndex}-${cardIndex}`}
-                    style={{ 
+                    style={{
                       marginTop,
-                      position: 'relative',
+                      position: "relative",
                       zIndex: cardIndex,
-                      opacity: draggedCards?.sourceIndex === pileIndex && 
-                              cardIndex >= draggedCards.cardIndex ? 0.3 : 1
+                      opacity:
+                        draggedCards?.sourceIndex === pileIndex &&
+                        cardIndex >= draggedCards.cardIndex
+                          ? 0.3
+                          : 1,
                     }}
                   >
-                    <CardComponent 
+                    <CardComponent
                       card={card}
                       draggable={card.faceUp}
-                      isDragging={draggedCards?.sourceIndex === pileIndex && 
-                                cardIndex >= draggedCards.cardIndex}
-                      onDragStart={(e) => handleDragStart(
-                        e,
-                        pile.slice(cardIndex),
-                        pileIndex,
-                        cardIndex
-                      )}
+                      isDragging={
+                        draggedCards?.sourceIndex === pileIndex &&
+                        cardIndex >= draggedCards.cardIndex
+                      }
+                      onDragStart={(e) =>
+                        handleDragStart(
+                          e,
+                          pile.slice(cardIndex),
+                          pileIndex,
+                          cardIndex,
+                        )
+                      }
                       style={customization.cardStyle}
                       cardBack={customization.cardBack}
-                      isGrayed={card.faceUp && !isCardInValidSequence(pileIndex, cardIndex)}
+                      isGrayed={
+                        card.faceUp &&
+                        !isCardInValidSequence(pileIndex, cardIndex)
+                      }
                       className="w-14 h-20"
                       variant="spider"
                     />
@@ -479,12 +533,13 @@ export function SpiderSolitaire({ mode = '1-suit', customization }: SpiderSolita
 }
 
 function calculateScore(state: SpiderGameState): number {
-  const timeBonus = Math.max(0, 1000000 - (Date.now() - state.startTime)) / 1000;
+  const timeBonus =
+    Math.max(0, 1000000 - (Date.now() - state.startTime)) / 1000;
   const difficultyMultiplier = {
     beginner: 1,
     medium: 1.5,
-    expert: 2
+    expert: 2,
   }[state.difficulty];
-  
+
   return Math.floor((state.score + timeBonus) * difficultyMultiplier);
 }

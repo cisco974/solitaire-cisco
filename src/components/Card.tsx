@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card as CardType } from '../types/cards';
-import { cardStyles, cardBackStyles, CardBackStyle } from '../types/customization';
+"use client";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Card as CardType } from "../types/cards";
+import {
+  CardBackStyle,
+  cardBackStyles,
+  cardStyles,
+} from "@/types/customization";
 
 interface CardProps {
   card: CardType;
@@ -12,33 +17,33 @@ interface CardProps {
   onDragEnd?: (e: React.DragEvent) => void;
   onDragOver?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
-  style?: 'classic' | 'colorful';
+  style?: "classic" | "colorful";
   cardBack?: CardBackStyle;
   isGrayed?: boolean;
   isHighlighted?: boolean;
   className?: string;
-  variant?: 'spider' | 'default';
+  variant?: "spider" | "default";
   isTableau?: boolean;
   isMagicMove?: boolean;
 }
 
-export function Card({ 
-  card, 
-  onClick, 
+export function Card({
+  card,
+  onClick,
   draggable = false,
   isDragging = false,
   onDragStart,
   onDragEnd,
   onDragOver,
   onDrop,
-  style = 'classic',
-  cardBack = 'classic-emerald',
+  style = "classic",
+  cardBack = "classic-emerald",
   isGrayed = false,
   isHighlighted = false,
-  className = 'w-20 h-32',
-  variant = 'default',
+  className = "w-20 h-32",
+  variant = "default",
   isTableau = false,
-  isMagicMove = false
+  isMagicMove = false,
 }: CardProps) {
   const { suit, rank, faceUp } = card;
   const cardStyle = cardStyles[style];
@@ -46,27 +51,30 @@ export function Card({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isBeingDragged, setIsBeingDragged] = useState(false);
 
-  const symbolSizes = variant === 'spider' ? {
-    rankSize: 'text-2xl',
-    suitSize: 'text-xl',
-    centerSize: 'text-5xl'
-  } : {
-    rankSize: 'text-3xl',
-    suitSize: 'text-2xl',
-    centerSize: 'text-8xl'
-  };
+  const symbolSizes =
+    variant === "spider"
+      ? {
+          rankSize: "text-2xl",
+          suitSize: "text-xl",
+          centerSize: "text-5xl",
+        }
+      : {
+          rankSize: "text-3xl",
+          suitSize: "text-2xl",
+          centerSize: "text-8xl",
+        };
 
   const handleDragStart = (e: React.DragEvent) => {
     if (!draggable || !faceUp) return;
 
-    const dragImage = document.createElement('div');
+    const dragImage = document.createElement("div");
     dragImage.className = `
       ${className} rounded-lg p-2
       flex flex-col justify-between
       bg-white
       ${cardStyle.colors[suit]}
     `;
-    
+
     dragImage.innerHTML = `
       <div class="flex items-start justify-between">
         <span class="${symbolSizes.rankSize} font-bold leading-none">${rank}</span>
@@ -79,26 +87,26 @@ export function Card({
       </div>
     `;
 
-    dragImage.style.position = 'fixed';
-    dragImage.style.top = '-1000px';
-    dragImage.style.left = '-1000px';
+    dragImage.style.position = "fixed";
+    dragImage.style.top = "-1000px";
+    dragImage.style.left = "-1000px";
     document.body.appendChild(dragImage);
 
     e.dataTransfer.setDragImage(dragImage, 30, 42);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', '');
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", "");
 
     requestAnimationFrame(() => {
       document.body.removeChild(dragImage);
     });
 
     setIsBeingDragged(true);
-    document.body.classList.add('dragging');
+    document.body.classList.add("dragging");
     onDragStart?.(e);
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
-    document.body.classList.remove('dragging');
+    document.body.classList.remove("dragging");
     setIsDragOver(false);
     setIsBeingDragged(false);
     onDragEnd?.(e);
@@ -106,12 +114,12 @@ export function Card({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    
+    e.dataTransfer.dropEffect = "move";
+
     if (!isDragOver) {
       setIsDragOver(true);
     }
-    
+
     onDragOver?.(e);
   };
 
@@ -132,10 +140,10 @@ export function Card({
   };
 
   return (
-    <div 
+    <div
       className={`
         relative ${className}
-        ${isBeingDragged ? 'opacity-0' : 'opacity-100'}
+        ${isBeingDragged ? "opacity-0" : "opacity-100"}
         transition-opacity duration-150
         perspective-1000
       `}
@@ -145,17 +153,17 @@ export function Card({
         animate={{
           rotateY: faceUp || isMagicMove ? 0 : 180,
           scale: isHighlighted ? 1.15 : 1,
-          y: isHighlighted ? -12 : 0
+          y: isHighlighted ? -12 : 0,
         }}
         transition={{
-          rotateY: { 
-            duration: isTableau && !isMagicMove && !faceUp ? 0.6 : 0, 
-            type: "spring", 
-            stiffness: 100, 
-            damping: 15 
+          rotateY: {
+            duration: isTableau && !isMagicMove && !faceUp ? 0.6 : 0,
+            type: "spring",
+            stiffness: 100,
+            damping: 15,
           },
           scale: { duration: 0.3, ease: "easeOut" },
-          y: { duration: 0.3, ease: "easeOut" }
+          y: { duration: 0.3, ease: "easeOut" },
         }}
         className="relative w-full h-full preserve-3d"
       >
@@ -175,27 +183,35 @@ export function Card({
             select-none
             bg-white
             ${cardStyle.colors[suit]}
-            ${draggable && !isGrayed ? 'active:cursor-grabbing' : ''}
+            ${draggable && !isGrayed ? "active:cursor-grabbing" : ""}
             shadow-lg
             transition-all duration-150 ease-out
             backface-visible-false
             transform-gpu
             relative
-            ${isGrayed ? 'cursor-not-allowed brightness-[0.97] contrast-[0.97]' : ''}
-            ${isHighlighted ? 'ring-4 ring-emerald-400 ring-opacity-75' : ''}
+            ${isGrayed ? "cursor-not-allowed brightness-[0.97] contrast-[0.97]" : ""}
+            ${isHighlighted ? "ring-4 ring-emerald-400 ring-opacity-75" : ""}
           `}
-          style={{ 
-            touchAction: 'none',
-            cursor: draggable && !isGrayed ? 'grab' : 'pointer'
+          style={{
+            touchAction: "none",
+            cursor: draggable && !isGrayed ? "grab" : "pointer",
           }}
         >
           <div className="flex items-start justify-between pointer-events-none">
-            <span className={`${symbolSizes.rankSize} font-bold leading-none drop-shadow-sm`}>{rank}</span>
-            <span className={`${symbolSizes.suitSize} drop-shadow-sm`}>{cardStyle.suits[suit]}</span>
+            <span
+              className={`${symbolSizes.rankSize} font-bold leading-none drop-shadow-sm`}
+            >
+              {rank}
+            </span>
+            <span className={`${symbolSizes.suitSize} drop-shadow-sm`}>
+              {cardStyle.suits[suit]}
+            </span>
           </div>
 
           <div className="absolute inset-x-0 bottom-1 flex justify-center pointer-events-none">
-            <span className={`${symbolSizes.centerSize} font-serif select-none leading-none drop-shadow-sm opacity-90`}>
+            <span
+              className={`${symbolSizes.centerSize} font-serif select-none leading-none drop-shadow-sm opacity-90`}
+            >
               {cardStyle.suits[suit]}
             </span>
           </div>
@@ -223,24 +239,30 @@ export function Card({
         </div>
 
         {/* Face down */}
-        <div 
+        <div
           className={`
             absolute inset-0 w-full h-full
             rounded-lg overflow-hidden
             select-none
             shadow-lg
             transition-all duration-150 ease-out
-            ${isDragOver ? 'ring-2 ring-emerald-400 ring-opacity-50' : ''}
+            ${isDragOver ? "ring-2 ring-emerald-400 ring-opacity-50" : ""}
             backface-visible-false rotate-y-180
             transform-gpu
             border-[4px] border-white
           `}
         >
-          <div className={`absolute inset-0 bg-gradient-to-br ${backStyle.colors[0]}`}>
-            <div className={`absolute inset-1 rounded-md overflow-hidden backdrop-blur-sm`}>
-              <div className={`absolute inset-0 grid grid-cols-4 gap-1 p-1 bg-grid-diamond`}>
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${backStyle.colors[0]}`}
+          >
+            <div
+              className={`absolute inset-1 rounded-md overflow-hidden backdrop-blur-sm`}
+            >
+              <div
+                className={`absolute inset-0 grid grid-cols-4 gap-1 p-1 bg-grid-diamond`}
+              >
                 {Array.from({ length: 24 }).map((_, i) => (
-                  <div 
+                  <div
                     key={i}
                     className={`
                       aspect-square rounded-sm transform rotate-45

@@ -1,23 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card as CardComponent } from './Card';
-import { DifficultySelector } from './DifficultySelector';
-import { GameTopbar } from './GameTopbar';
-import { FoundationPile } from './FoundationPile';
-import { Card, isPartOfDescendingSequence, getRankValue, getCardColor } from '../types/cards';
-import { FreeCellGameState, FreeCellDifficulty, isValidFreeCellMove, isValidFreeCellFoundationMove, checkFreeCellWinCondition } from '../types/freecellCards';
-import { Trophy } from 'lucide-react';
-import { useSoundEffects } from '../hooks/useSoundEffects';
-import { useFreeCellGameState } from '../hooks/useFreeCellGameState';
-import { GameCustomization } from '../types/customization';
+"use client";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Card as CardComponent } from "./Card";
+import { DifficultySelector } from "./DifficultySelector";
+import { GameTopbar } from "./GameTopbar";
+import { FoundationPile } from "./FoundationPile";
+import { Card, getCardColor, getRankValue } from "@/types/cards";
+import {
+  checkFreeCellWinCondition,
+  FreeCellGameState,
+  isValidFreeCellFoundationMove,
+  isValidFreeCellMove,
+} from "@/types/freecellCards";
+import { Trophy } from "lucide-react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useFreeCellGameState } from "@/hooks/useFreeCellGameState";
+import { GameCustomization } from "@/types/customization";
 
 interface FreeCellProps {
   customization: GameCustomization;
 }
 
 function createFreeCellDeck(): Card[] {
-  const suits = ['♠', '♥', '♦', '♣'];
-  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  const suits = ["♠", "♥", "♦", "♣"];
+  const ranks = [
+    "A",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+  ];
   const deck: Card[] = [];
 
   for (const suit of suits) {
@@ -39,19 +59,19 @@ function shuffle(array: Card[]): Card[] {
 }
 
 export function FreeCell({ customization }: FreeCellProps) {
-  const { 
-    gameState, 
-    updateState, 
-    addMove, 
-    undo, 
-    redo, 
-    canUndo, 
+  const {
+    gameState,
+    updateState,
+    addMove,
+    undo,
+    redo,
+    canUndo,
     canRedo,
-    updateStats
+    updateStats,
   } = useFreeCellGameState();
   const [draggedCards, setDraggedCards] = useState<{
     cards: Card[];
-    sourceType: 'tableau' | 'freeCell';
+    sourceType: "tableau" | "freeCell";
     sourceIndex: number;
     cardIndex: number;
   } | null>(null);
@@ -68,7 +88,7 @@ export function FreeCell({ customization }: FreeCellProps) {
       playWin();
       updateState({
         isComplete: true,
-        score: calculateScore(gameState)
+        score: calculateScore(gameState),
       });
       updateStats(true);
     }
@@ -86,8 +106,10 @@ export function FreeCell({ customization }: FreeCellProps) {
 
   function startNewGame() {
     const deck = createFreeCellDeck();
-    const newTableauPiles: Card[][] = Array(8).fill([]).map(() => []);
-    
+    const newTableauPiles: Card[][] = Array(8)
+      .fill([])
+      .map(() => []);
+
     // Deal cards to tableau piles
     for (let i = 0; i < 52; i++) {
       const pileIndex = i % 8;
@@ -102,7 +124,7 @@ export function FreeCell({ customization }: FreeCellProps) {
       score: 0,
       moves: 0,
       startTime: Date.now(),
-      isComplete: false
+      isComplete: false,
     });
   }
 
@@ -113,20 +135,25 @@ export function FreeCell({ customization }: FreeCellProps) {
     for (let i = 0; i < cards.length - 1; i++) {
       const currentCard = cards[i];
       const nextCard = cards[i + 1];
-      
-      if (getCardColor(currentCard.suit) === getCardColor(nextCard.suit)) return false;
-      if (getRankValue(currentCard.rank) !== getRankValue(nextCard.rank) + 1) return false;
+
+      if (getCardColor(currentCard.suit) === getCardColor(nextCard.suit))
+        return false;
+      if (getRankValue(currentCard.rank) !== getRankValue(nextCard.rank) + 1)
+        return false;
     }
 
     return true;
   };
 
-  const isCardInValidSequence = (pileIndex: number, cardIndex: number): boolean => {
+  const isCardInValidSequence = (
+    pileIndex: number,
+    cardIndex: number,
+  ): boolean => {
     const pile = gameState.tableauPiles[pileIndex];
-    
+
     // Last card in pile is always valid for moving
     if (cardIndex === pile.length - 1) return true;
-    
+
     // Check if this card starts a valid sequence to the end of the pile
     const sequence = pile.slice(cardIndex);
     return isValidSequence(sequence);
@@ -137,8 +164,12 @@ export function FreeCell({ customization }: FreeCellProps) {
     if (!isCardInValidSequence(pileIndex, cardIndex)) return false;
 
     // Calculate maximum movable cards based on free cells and empty columns
-    const emptyFreeCells = gameState.freeCells.filter(cell => cell === null).length;
-    const emptyColumns = gameState.tableauPiles.filter(pile => pile.length === 0).length;
+    const emptyFreeCells = gameState.freeCells.filter(
+      (cell) => cell === null,
+    ).length;
+    const emptyColumns = gameState.tableauPiles.filter(
+      (pile) => pile.length === 0,
+    ).length;
     const maxMovableCards = (emptyFreeCells + 1) * Math.pow(2, emptyColumns);
 
     // Check if sequence length is within movable limit
@@ -149,24 +180,24 @@ export function FreeCell({ customization }: FreeCellProps) {
   const handleDragStart = (
     e: React.DragEvent,
     cards: Card[],
-    sourceType: 'tableau' | 'freeCell',
+    sourceType: "tableau" | "freeCell",
     sourceIndex: number,
-    cardIndex: number
+    cardIndex: number,
   ) => {
     if (!e.dataTransfer) return;
-    
+
     // Check if the card is draggable
-    if (sourceType === 'tableau' && !canDragCard(sourceIndex, cardIndex)) {
+    if (sourceType === "tableau" && !canDragCard(sourceIndex, cardIndex)) {
       playError();
       e.preventDefault();
       return;
     }
-    
+
     setDraggedCards({
       cards,
       sourceType,
       sourceIndex,
-      cardIndex
+      cardIndex,
     });
     playCardMove();
   };
@@ -174,41 +205,52 @@ export function FreeCell({ customization }: FreeCellProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.dropEffect = "move";
     }
   };
 
   const handleDrop = (
     e: React.DragEvent,
-    targetType: 'tableau' | 'foundation' | 'freeCell',
-    targetIndex: number
+    targetType: "tableau" | "foundation" | "freeCell",
+    targetIndex: number,
   ) => {
     e.preventDefault();
-    
+
     if (!draggedCards) return;
-    
+
     const { cards, sourceType, sourceIndex, cardIndex } = draggedCards;
-    
+
     // Handle dropping on foundation piles
-    if (targetType === 'foundation') {
+    if (targetType === "foundation") {
       if (cards.length !== 1) {
         playError();
         return;
       }
 
       const [card] = cards;
-      if (!isValidFreeCellFoundationMove(card, gameState.foundationPiles[targetIndex])) {
+      if (
+        !isValidFreeCellFoundationMove(
+          card,
+          gameState.foundationPiles[targetIndex],
+        )
+      ) {
         playError();
         return;
       }
 
       const newFoundationPiles = [...gameState.foundationPiles];
-      newFoundationPiles[targetIndex] = [...newFoundationPiles[targetIndex], card];
+      newFoundationPiles[targetIndex] = [
+        ...newFoundationPiles[targetIndex],
+        card,
+      ];
 
       // Remove card from source
-      if (sourceType === 'tableau') {
+      if (sourceType === "tableau") {
         const newTableauPiles = [...gameState.tableauPiles];
-        newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(0, -1);
+        newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(
+          0,
+          -1,
+        );
         updateState({ tableauPiles: newTableauPiles });
       } else {
         const newFreeCells = [...gameState.freeCells];
@@ -219,37 +261,45 @@ export function FreeCell({ customization }: FreeCellProps) {
       updateState({
         foundationPiles: newFoundationPiles,
         score: gameState.score + 10,
-        moves: gameState.moves + 1
+        moves: gameState.moves + 1,
       });
 
       addMove({
-        type: 'move',
+        type: "move",
         from: { type: sourceType, index: sourceIndex },
-        to: { type: 'foundation', index: targetIndex },
-        cards
+        to: { type: "foundation", index: targetIndex },
+        cards,
       });
 
       playCardMove();
     }
-    
+
     // Handle dropping on tableau piles
-    else if (targetType === 'tableau') {
-      if (!isValidFreeCellMove(
-        cards,
-        gameState.tableauPiles[targetIndex],
-        gameState.freeCells,
-        gameState.tableauPiles
-      )) {
+    else if (targetType === "tableau") {
+      if (
+        !isValidFreeCellMove(
+          cards,
+          gameState.tableauPiles[targetIndex],
+          gameState.freeCells,
+          gameState.tableauPiles,
+        )
+      ) {
         playError();
         return;
       }
 
       const newTableauPiles = [...gameState.tableauPiles];
-      newTableauPiles[targetIndex] = [...newTableauPiles[targetIndex], ...cards];
+      newTableauPiles[targetIndex] = [
+        ...newTableauPiles[targetIndex],
+        ...cards,
+      ];
 
       // Remove cards from source
-      if (sourceType === 'tableau') {
-        newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(0, cardIndex);
+      if (sourceType === "tableau") {
+        newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(
+          0,
+          cardIndex,
+        );
       } else {
         const newFreeCells = [...gameState.freeCells];
         newFreeCells[sourceIndex] = null;
@@ -259,28 +309,28 @@ export function FreeCell({ customization }: FreeCellProps) {
       updateState({
         tableauPiles: newTableauPiles,
         score: gameState.score + 5,
-        moves: gameState.moves + 1
+        moves: gameState.moves + 1,
       });
 
       addMove({
-        type: 'move',
+        type: "move",
         from: {
           type: sourceType,
           index: sourceIndex,
-          cardIndex
+          cardIndex,
         },
         to: {
-          type: 'tableau',
-          index: targetIndex
+          type: "tableau",
+          index: targetIndex,
         },
-        cards
+        cards,
       });
 
       playCardMove();
     }
-    
+
     // Handle dropping on free cells
-    else if (targetType === 'freeCell') {
+    else if (targetType === "freeCell") {
       if (cards.length !== 1 || gameState.freeCells[targetIndex] !== null) {
         playError();
         return;
@@ -290,32 +340,35 @@ export function FreeCell({ customization }: FreeCellProps) {
       newFreeCells[targetIndex] = cards[0];
 
       // Remove card from source
-      if (sourceType === 'tableau') {
+      if (sourceType === "tableau") {
         const newTableauPiles = [...gameState.tableauPiles];
-        newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(0, -1);
+        newTableauPiles[sourceIndex] = newTableauPiles[sourceIndex].slice(
+          0,
+          -1,
+        );
         updateState({
           tableauPiles: newTableauPiles,
           freeCells: newFreeCells,
-          moves: gameState.moves + 1
+          moves: gameState.moves + 1,
         });
       } else {
         newFreeCells[sourceIndex] = null;
         updateState({
           freeCells: newFreeCells,
-          moves: gameState.moves + 1
+          moves: gameState.moves + 1,
         });
       }
 
       addMove({
-        type: 'move',
+        type: "move",
         from: { type: sourceType, index: sourceIndex },
-        to: { type: 'freeCell', index: targetIndex },
-        cards
+        to: { type: "freeCell", index: targetIndex },
+        cards,
       });
 
       playCardMove();
     }
-    
+
     setDraggedCards(null);
   };
 
@@ -324,13 +377,13 @@ export function FreeCell({ customization }: FreeCellProps) {
       {/* Settings Modal */}
       <AnimatePresence>
         {showSettings && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -363,19 +416,19 @@ export function FreeCell({ customization }: FreeCellProps) {
       {/* Win Modal */}
       <AnimatePresence>
         {gameState.isComplete && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white rounded-xl p-8 max-w-md w-full mx-4"
             >
-              <motion.div 
+              <motion.div
                 initial={{ rotate: -180, scale: 0 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: "spring" }}
@@ -383,7 +436,9 @@ export function FreeCell({ customization }: FreeCellProps) {
               >
                 <Trophy className="w-16 h-16 text-yellow-400" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-center mb-4">Congratulations!</h2>
+              <h2 className="text-2xl font-bold text-center mb-4">
+                Congratulations!
+              </h2>
               <p className="text-gray-600 text-center mb-6">
                 You've won with a score of {gameState.score}!
               </p>
@@ -422,7 +477,7 @@ export function FreeCell({ customization }: FreeCellProps) {
               <FoundationPile
                 pile={card ? [card] : []}
                 onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, 'freeCell', index)}
+                onDrop={(e) => handleDrop(e, "freeCell", index)}
                 isLight={true}
               />
             </div>
@@ -434,7 +489,7 @@ export function FreeCell({ customization }: FreeCellProps) {
               <FoundationPile
                 pile={pile}
                 onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, 'foundation', index)}
+                onDrop={(e) => handleDrop(e, "foundation", index)}
               />
             </div>
           ))}
@@ -443,52 +498,59 @@ export function FreeCell({ customization }: FreeCellProps) {
         {/* Tableau piles */}
         <div className="grid grid-cols-8 gap-2">
           {gameState.tableauPiles.map((pile, pileIndex) => (
-            <div 
+            <div
               key={`tableau-${pileIndex}`}
               className={`
                 col-span-1 flex flex-col min-h-[8rem]
-                ${pile.length === 0 ? 'border-2 border-dashed border-emerald-400/10 rounded-lg w-20' : ''}
+                ${pile.length === 0 ? "border-2 border-dashed border-emerald-400/10 rounded-lg w-20" : ""}
               `}
               onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 'tableau', pileIndex)}
+              onDrop={(e) => handleDrop(e, "tableau", pileIndex)}
             >
               {pile.map((card, cardIndex) => {
                 const prevCard = cardIndex > 0 ? pile[cardIndex - 1] : null;
-                let marginTop = '0';
-                
+                let marginTop = "0";
+
                 if (cardIndex > 0) {
                   if (!prevCard?.faceUp && !card.faceUp) {
-                    marginTop = '-7rem'; // Closed to closed
+                    marginTop = "-7rem"; // Closed to closed
                   } else if (!prevCard?.faceUp && card.faceUp) {
-                    marginTop = '-7rem'; // Closed to open
+                    marginTop = "-7rem"; // Closed to open
                   } else if (prevCard?.faceUp && card.faceUp) {
-                    marginTop = '-5.5rem'; // Open to open (reduced from -4rem)
+                    marginTop = "-5.5rem"; // Open to open (reduced from -4rem)
                   }
                 }
 
                 return (
-                  <div 
+                  <div
                     key={`card-${pileIndex}-${cardIndex}`}
-                    style={{ 
+                    style={{
                       marginTop,
-                      position: 'relative',
+                      position: "relative",
                       zIndex: cardIndex,
-                      opacity: draggedCards?.sourceIndex === pileIndex && 
-                              cardIndex >= draggedCards.cardIndex ? 0.3 : 1
+                      opacity:
+                        draggedCards?.sourceIndex === pileIndex &&
+                        cardIndex >= draggedCards.cardIndex
+                          ? 0.3
+                          : 1,
                     }}
                   >
-                    <CardComponent 
+                    <CardComponent
                       card={card}
                       draggable={canDragCard(pileIndex, cardIndex)}
-                      isDragging={draggedCards?.sourceIndex === pileIndex && 
-                                cardIndex >= draggedCards.cardIndex}
-                      onDragStart={(e) => handleDragStart(
-                        e,
-                        pile.slice(cardIndex),
-                        'tableau',
-                        pileIndex,
-                        cardIndex
-                      )}
+                      isDragging={
+                        draggedCards?.sourceIndex === pileIndex &&
+                        cardIndex >= draggedCards.cardIndex
+                      }
+                      onDragStart={(e) =>
+                        handleDragStart(
+                          e,
+                          pile.slice(cardIndex),
+                          "tableau",
+                          pileIndex,
+                          cardIndex,
+                        )
+                      }
                       style={customization.cardStyle}
                       cardBack={customization.cardBack}
                       isGrayed={!isCardInValidSequence(pileIndex, cardIndex)}
@@ -509,8 +571,8 @@ function calculateScore(state: FreeCellGameState): number {
   const difficultyMultiplier = {
     easy: 1,
     medium: 1.5,
-    hard: 2
+    hard: 2,
   }[state.difficulty];
-  
+
   return Math.floor((state.score + timeBonus) * difficultyMultiplier);
 }
