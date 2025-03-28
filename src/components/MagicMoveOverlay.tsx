@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from './Card';
-import { Card as CardType } from '../types/cards';
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Card } from "./Card";
+import { Card as CardType } from "../types/cards";
 
 interface MagicMoveOverlayProps {
   isVisible: boolean;
@@ -9,7 +9,11 @@ interface MagicMoveOverlayProps {
   onAnimationComplete: () => void;
 }
 
-export function MagicMoveOverlay({ isVisible, card, onAnimationComplete }: MagicMoveOverlayProps) {
+export function MagicMoveOverlay({
+  isVisible,
+  card,
+  onAnimationComplete,
+}: MagicMoveOverlayProps) {
   return (
     <AnimatePresence>
       {isVisible && card && (
@@ -27,48 +31,30 @@ export function MagicMoveOverlay({ isVisible, card, onAnimationComplete }: Magic
             transition={{ duration: 0.3 }}
           >
             <motion.div
-              initial={{ 
+              initial={{
                 scale: 0,
                 opacity: 0,
                 rotate: 0,
-                x: '-50%',
-                y: '-50%'
+                x: "-50%",
+                y: "-50%",
               }}
-              animate={[
-                // Initial appearance with scale up
-                { 
-                  scale: 3,
-                  opacity: 1,
-                  rotate: 0,
-                  transition: { 
-                    duration: 0.3,
-                    ease: "easeOut"
-                  }
-                },
-                // First 360° rotation
-                { 
-                  rotate: 360,
-                  transition: { 
-                    duration: 1,
-                    ease: "linear"
-                  }
-                },
-                // Second 360° rotation
-                { 
-                  rotate: 720,
-                  transition: { 
-                    duration: 1,
-                    ease: "linear"
-                  }
-                }
-              ]}
+              animate={{
+                scale: [0, 3, 3],
+                opacity: [0, 1, 1],
+                rotate: [0, 360, 720],
+              }}
+              transition={{
+                duration: 2.3,
+                ease: "linear",
+                times: [0, 0.3 / 2.3, 1], // optionnel : pour mieux contrôler le timing des étapes
+              }}
               style={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transformOrigin: 'center center',
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transformOrigin: "center center",
                 perspective: 1000,
-                transformStyle: 'preserve-3d'
+                transformStyle: "preserve-3d",
               }}
             >
               <Card
@@ -90,13 +76,13 @@ export function MagicMoveOverlay({ isVisible, card, onAnimationComplete }: Magic
             {/* Particle burst effect */}
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ 
+              animate={{
                 scale: [0.5, 2],
-                opacity: [0, 1, 0]
+                opacity: [0, 1, 0],
               }}
               transition={{
                 duration: 0.5,
-                times: [0, 0.2, 1]
+                times: [0, 0.2, 1],
               }}
               className="absolute inset-0 pointer-events-none"
             >
@@ -104,31 +90,31 @@ export function MagicMoveOverlay({ isVisible, card, onAnimationComplete }: Magic
               {Array.from({ length: 12 }).map((_, i) => (
                 <motion.div
                   key={i}
-                  initial={{ 
+                  initial={{
                     x: 0,
                     y: 0,
                     scale: 0,
-                    opacity: 0
+                    opacity: 0,
                   }}
-                  animate={{ 
-                    x: Math.cos(i * 30 * Math.PI / 180) * 50,
-                    y: Math.sin(i * 30 * Math.PI / 180) * 50,
+                  animate={{
+                    x: Math.cos((i * 30 * Math.PI) / 180) * 50,
+                    y: Math.sin((i * 30 * Math.PI) / 180) * 50,
                     scale: [0, 1, 0],
-                    opacity: [0, 1, 0]
+                    opacity: [0, 1, 0],
                   }}
                   transition={{
                     duration: 0.5,
-                    ease: "easeOut"
+                    ease: "easeOut",
                   }}
                   style={{
-                    position: 'absolute',
-                    left: 'calc(50% - 2px)',
-                    top: 'calc(50% - 2px)',
-                    width: '4px',
-                    height: '4px',
-                    background: 'white',
-                    borderRadius: '50%',
-                    filter: 'blur(2px)'
+                    position: "absolute",
+                    left: "calc(50% - 2px)",
+                    top: "calc(50% - 2px)",
+                    width: "4px",
+                    height: "4px",
+                    background: "white",
+                    borderRadius: "50%",
+                    filter: "blur(2px)",
                   }}
                 />
               ))}
@@ -136,20 +122,20 @@ export function MagicMoveOverlay({ isVisible, card, onAnimationComplete }: Magic
 
             {/* Card appearance in foundation */}
             <motion.div
-              initial={{ 
+              initial={{
                 scale: 0,
                 opacity: 0,
-                y: 0
+                y: 0,
               }}
-              animate={{ 
+              animate={{
                 scale: [0, 1.2, 1],
                 opacity: 1,
-                y: [-50, 0]
+                y: [-50, 0],
               }}
               transition={{
                 duration: 0.5,
                 times: [0, 0.6, 1],
-                ease: [0.34, 1.56, 0.64, 1]
+                ease: [0.34, 1.56, 0.64, 1],
               }}
               onAnimationComplete={onAnimationComplete}
             >

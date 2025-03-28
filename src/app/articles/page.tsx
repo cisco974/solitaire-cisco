@@ -1,6 +1,7 @@
+"use client";
 import { useState } from "react";
-import { StandardPage } from "../components/StandardPage";
-import { ArticleCard } from "../components/ArticleCard";
+import { StandardPage } from "@/components/StandardPage";
+import { ArticleCard } from "@/components/ArticleCard";
 import { Search } from "lucide-react";
 
 type ArticleType = "guides" | "blog";
@@ -67,7 +68,7 @@ const articles: Article[] = [
   },
 ];
 
-export function Articles() {
+export default function Articles() {
   const [selectedType, setSelectedType] = useState<ArticleType>("guides");
   const [searchQuery, setSearchQuery] = useState("");
 

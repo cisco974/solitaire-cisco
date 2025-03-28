@@ -15,8 +15,10 @@ export function useGameCustomization() {
     useState<GameCustomization>(defaultCustomization);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage once the component mounts (client-side only)
+  // Load customization AFTER render (client-only)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -32,9 +34,10 @@ export function useGameCustomization() {
     const newCustomization = { ...customization, ...updates };
     setCustomization(newCustomization);
 
-    // Only try to update localStorage if we're on the client
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newCustomization));
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newCustomization));
+      }
     } catch (error) {
       console.error("Error updating localStorage:", error);
     }

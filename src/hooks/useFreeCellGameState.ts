@@ -1,11 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  FreeCellDifficulty,
-  FreeCellGameAction,
-  FreeCellGameState,
-} from "@/types/freecellCards";
+import { FreeCellGameAction, FreeCellGameState } from "@/types/freecellCards";
+import { Difficulty } from "@/types/global";
 
 const STORAGE_KEY = "freecell-stats";
 
@@ -28,7 +25,7 @@ const defaultState: FreeCellGameState = {
   tableauPiles: Array(8).fill([]),
   foundationPiles: Array(4).fill([]),
   freeCells: Array(4).fill(null),
-  difficulty: "medium" as FreeCellDifficulty,
+  difficulty: "medium",
   ...defaultStats,
 };
 
@@ -192,7 +189,7 @@ export function useFreeCellGameState() {
   }, [history, historyIndex]);
 
   const setDifficulty = useCallback(
-    (difficulty: FreeCellDifficulty) => {
+    (difficulty: Difficulty) => {
       updateState({ difficulty });
     },
     [updateState],

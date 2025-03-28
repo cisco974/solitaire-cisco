@@ -1,4 +1,5 @@
 import { Card } from "./cards";
+import { Difficulty } from "@/types/global";
 
 export interface SpiderGameState {
   score: number;
@@ -8,14 +9,13 @@ export interface SpiderGameState {
   tableauPiles: Card[][];
   foundationPiles: Card[][];
   stock: Card[][]; // Groups of 10 cards for dealing
-  difficulty: SpiderDifficulty;
+  difficulty: Difficulty;
   mode: SpiderMode;
-  bestScores: Record<SpiderDifficulty, number>;
+  bestScores: Record<Difficulty, number>;
   gamesPlayed: number;
   gamesWon: number;
 }
 
-export type SpiderDifficulty = "beginner" | "medium" | "expert";
 export type SpiderMode = "1-suit" | "2-suits" | "4-suits";
 
 export interface SpiderGameAction {
@@ -69,9 +69,9 @@ export const calculateSpiderScore = (state: SpiderGameState): number => {
   const timeBonus =
     Math.max(0, 1000000 - (Date.now() - state.startTime)) / 1000;
   const difficultyMultiplier = {
-    beginner: 1,
+    easy: 1,
     medium: 1.5,
-    expert: 2,
+    hard: 2,
   }[state.difficulty];
 
   return Math.floor((state.score + timeBonus) * difficultyMultiplier);

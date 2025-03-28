@@ -1,4 +1,5 @@
-import { Card, Suit, Rank } from './cards';
+import { Card, Rank, Suit } from "./cards";
+import { Difficulty } from "@/types/global";
 
 export interface FreeCellGameState {
   score: number;
@@ -8,23 +9,21 @@ export interface FreeCellGameState {
   tableauPiles: Card[][];
   foundationPiles: Card[][];
   freeCells: (Card | null)[];
-  difficulty: FreeCellDifficulty;
-  bestScores: Record<FreeCellDifficulty, number>;
+  difficulty: Difficulty;
+  bestScores: Record<Difficulty, number>;
   gamesPlayed: number;
   gamesWon: number;
 }
 
-export type FreeCellDifficulty = 'easy' | 'medium' | 'hard';
-
 export interface FreeCellGameAction {
-  type: 'move';
+  type: "move";
   from: {
-    type: 'tableau' | 'freeCell';
+    type: "tableau" | "freeCell";
     index: number;
     cardIndex?: number;
   };
   to: {
-    type: 'tableau' | 'foundation' | 'freeCell';
+    type: "tableau" | "foundation" | "freeCell";
     index: number;
   };
   cards: Card[];
@@ -34,13 +33,13 @@ export const isValidFreeCellMove = (
   cards: Card[],
   targetPile: Card[],
   freeCells: (Card | null)[],
-  tableauPiles: Card[][]
+  tableauPiles: Card[][],
 ): boolean => {
   // Check if we have enough free cells and empty columns for the move
-  const emptyFreeCells = freeCells.filter(cell => cell === null).length;
-  const emptyColumns = tableauPiles.filter(pile => pile.length === 0).length;
+  const emptyFreeCells = freeCells.filter((cell) => cell === null).length;
+  const emptyColumns = tableauPiles.filter((pile) => pile.length === 0).length;
   const maxMovableCards = (emptyFreeCells + 1) * Math.pow(2, emptyColumns);
-  
+
   if (cards.length > maxMovableCards) return false;
 
   if (targetPile.length === 0) {
@@ -49,23 +48,32 @@ export const isValidFreeCellMove = (
 
   const [firstCard] = cards;
   const topCard = targetPile[targetPile.length - 1];
-  
-  return getCardColor(firstCard.suit) !== getCardColor(topCard.suit) &&
-         getRankValue(firstCard.rank) === getRankValue(topCard.rank) - 1;
+
+  return (
+    getCardColor(firstCard.suit) !== getCardColor(topCard.suit) &&
+    getRankValue(firstCard.rank) === getRankValue(topCard.rank) - 1
+  );
 };
 
-export const isValidFreeCellFoundationMove = (card: Card, targetPile: Card[]): boolean => {
+export const isValidFreeCellFoundationMove = (
+  card: Card,
+  targetPile: Card[],
+): boolean => {
   if (targetPile.length === 0) {
-    return card.rank === 'A';
+    return card.rank === "A";
   }
-  
+
   const topCard = targetPile[targetPile.length - 1];
-  return card.suit === topCard.suit && 
-         getRankValue(card.rank) === getRankValue(topCard.rank) + 1;
+  return (
+    card.suit === topCard.suit &&
+    getRankValue(card.rank) === getRankValue(topCard.rank) + 1
+  );
 };
 
-export const checkFreeCellWinCondition = (foundationPiles: Card[][]): boolean => {
-  return foundationPiles.every(pile => pile.length === 13);
+export const checkFreeCellWinCondition = (
+  foundationPiles: Card[][],
+): boolean => {
+  return foundationPiles.every((pile) => pile.length === 13);
 };
 
 export const calculateFreeCellScore = (state: FreeCellGameState): number => {
@@ -73,21 +81,31 @@ export const calculateFreeCellScore = (state: FreeCellGameState): number => {
   const difficultyMultiplier = {
     easy: 1,
     medium: 1.5,
-    hard: 2
+    hard: 2,
   }[state.difficulty];
-  
+
   return Math.floor((state.score + timeBonus) * difficultyMultiplier);
 };
 
 function getRankValue(rank: Rank): number {
   const rankValues: Record<Rank, number> = {
-    'K': 13, 'Q': 12, 'J': 11, '10': 10, '9': 9,
-    '8': 8, '7': 7, '6': 6, '5': 5, '4': 4,
-    '3': 3, '2': 2, 'A': 1
+    K: 13,
+    Q: 12,
+    J: 11,
+    "10": 10,
+    "9": 9,
+    "8": 8,
+    "7": 7,
+    "6": 6,
+    "5": 5,
+    "4": 4,
+    "3": 3,
+    "2": 2,
+    A: 1,
   };
   return rankValues[rank];
 }
 
-function getCardColor(suit: Suit): 'red' | 'black' {
-  return suit === '♥' || suit === '♦' ? 'red' : 'black';
+function getCardColor(suit: Suit): "red" | "black" {
+  return suit === "♥" || suit === "♦" ? "red" : "black";
 }

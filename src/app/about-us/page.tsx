@@ -1,7 +1,8 @@
+"use client";
 import React from "react";
-import { StandardPage } from "../components/StandardPage";
+import { StandardPage } from "@/components/StandardPage";
 
-export function AboutUs() {
+export default function AboutUs() {
   return (
     <StandardPage title="About Us">
       <p className="lead text-xl text-gray-600 mb-8">
@@ -70,3 +71,4 @@ export function AboutUs() {
     </StandardPage>
   );
 }
+export const dynamic = "force-dynamic";

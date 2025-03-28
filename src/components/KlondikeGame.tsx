@@ -578,10 +578,7 @@ export function KlondikeGame({
                   opacity: 0,
                   transition: { duration: 0.3 },
                 }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeOut",
-                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 style={{
                   position: "absolute",
                   width: "100%",
@@ -631,6 +628,7 @@ export function KlondikeGame({
         hasMagicMove={findValidMoves(gameState).some(
           (move) => move.to.type === "foundation",
         )}
+        canRedo={false}
       />
 
       <div className="p-4">

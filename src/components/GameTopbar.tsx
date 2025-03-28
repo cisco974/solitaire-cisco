@@ -11,11 +11,13 @@ interface GameTopbarProps {
   elapsedTime: number;
   score: number;
   canUndo: boolean;
+  canRedo: boolean;
   onUndo: () => void;
   onHint: () => void;
   onMagicWand: () => void;
   extraControls?: React.ReactNode;
-  hasMagicMove?: boolean; // <-- Add this line
+  hasMagicMove?: boolean;
+  onRedo?: () => void;
 }
 
 export function GameTopbar({
@@ -101,14 +103,12 @@ export function GameTopbar({
               {moves}
             </div>
           </div>
-
           <div className={`${buttonClasses}`}>
             <div className="text-white/50 text-xs">TIME</div>
             <div className="text-white font-medium tabular-nums text-sm">
               {formatTime(elapsedTime)}
             </div>
           </div>
-
           <div className={`${buttonClasses}`}>
             <div className="text-white/50 text-xs">SCORE</div>
             <div className="text-white font-medium tabular-nums text-sm">
@@ -116,11 +116,9 @@ export function GameTopbar({
             </div>
           </div>
         </div>
-
         {/* Controls */}
         <div className="flex items-center gap-4">
           {extraControls}
-
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -146,7 +144,6 @@ export function GameTopbar({
               </div>
             )}
           </motion.button>
-
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -163,7 +160,6 @@ export function GameTopbar({
               </div>
             )}
           </motion.button>
-
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -182,7 +178,6 @@ export function GameTopbar({
           </motion.button>
         </div>
       </div>
-
       <AdModal isOpen={showHintAdModal} onClose={closeHintAdModal} />
       <AdModal isOpen={showUndoAdModal} onClose={closeUndoAdModal} />
       <AdModal isOpen={showMagicAdModal} onClose={closeMagicAdModal} />

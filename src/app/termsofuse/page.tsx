@@ -1,7 +1,8 @@
+"use client";
 import React from "react";
-import { StandardPage } from "../components/StandardPage";
+import { StandardPage } from "@/components/StandardPage";
 
-export function TermsOfUse() {
+export default function TermsOfUse() {
   return (
     <StandardPage title="Terms of Use">
       <p className="lead text-xl text-gray-600 mb-8">

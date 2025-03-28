@@ -10,18 +10,18 @@ import {
   checkSpiderWinCondition,
   isValidSpiderFoundationMove,
   isValidSpiderTableauMove,
-  SpiderDifficulty,
   SpiderGameState,
 } from "@/types/spiderCards";
 import { Trophy } from "lucide-react";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSpiderGameState } from "@/hooks/useSpiderGameState";
 import { GameCustomization } from "@/types/customization";
+import { Difficulty } from "@/types/global";
 
 interface SpiderSolitaireProps {
   mode?: "draw-1" | "draw-3";
   customization: GameCustomization;
-  difficulty?: "easy" | "medium" | "hard";
+  difficulty?: Difficulty;
 }
 
 function shuffle(array: Card[]): Card[] {
@@ -34,7 +34,7 @@ function shuffle(array: Card[]): Card[] {
 }
 
 export function SpiderSolitaire({
-  mode = "1-suit",
+  mode = "draw-1",
   customization,
 }: SpiderSolitaireProps) {
   const {
@@ -59,10 +59,6 @@ export function SpiderSolitaire({
   const { playCardMove, playCardFlip, playWin, playError } = useSoundEffects();
 
   useEffect(() => {
-    startNewGame();
-  }, []);
-
-  useEffect(() => {
     if (checkSpiderWinCondition(gameState.foundationPiles)) {
       playWin();
       updateState({
@@ -71,7 +67,7 @@ export function SpiderSolitaire({
       });
       updateStats(true);
     }
-  }, [gameState.foundationPiles, playWin, updateState, updateStats]);
+  }, [gameState, playWin, updateState, updateStats]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -83,11 +79,11 @@ export function SpiderSolitaire({
     return () => clearInterval(timer);
   }, [gameState.startTime, gameState.isComplete]);
 
-  function createSpiderDeck(): Card[] {
+  const createSpiderDeck = useCallback((): Card[] => {
     const suits =
-      mode === "1-suit"
+      mode === "draw-1"
         ? ["♠"]
-        : mode === "2-suits"
+        : mode === "draw-3"
           ? ["♠", "♥"]
           : ["♠", "♥", "♦", "♣"];
 
@@ -108,7 +104,6 @@ export function SpiderSolitaire({
     ];
     const deck: Card[] = [];
 
-    // Add appropriate number of decks based on mode
     const numDecks = 8 / suits.length;
 
     for (let d = 0; d < numDecks; d++) {
@@ -120,7 +115,7 @@ export function SpiderSolitaire({
     }
 
     return shuffle(deck);
-  }
+  }, [mode]);
 
   const startNewGame = useCallback(() => {
     const deck = createSpiderDeck();
@@ -128,18 +123,15 @@ export function SpiderSolitaire({
       .fill([])
       .map(() => []);
 
-    // Deal initial cards
     for (let i = 0; i < 54; i++) {
       const pileIndex = i % 10;
       const card = deck.pop()!;
       if (i >= 44) {
-        // Last cards in each pile are face up
         card.faceUp = true;
       }
       newTableauPiles[pileIndex] = [...newTableauPiles[pileIndex], card];
     }
 
-    // Split remaining cards into groups of 10 for the stock
     const stockPiles: Card[][] = [];
     while (deck.length >= 10) {
       stockPiles.push(deck.splice(0, 10));
@@ -154,7 +146,11 @@ export function SpiderSolitaire({
       startTime: Date.now(),
       isComplete: false,
     });
-  }, [updateState]);
+  }, [createSpiderDeck, updateState]);
+
+  useEffect(() => {
+    startNewGame();
+  }, [startNewGame]);
 
   const handleDealCards = () => {
     if (gameState.stock.length === 0 || isDealing) {
@@ -363,9 +359,9 @@ export function SpiderSolitaire({
               <div className="mb-6">
                 <h3 className="text-gray-700 font-medium mb-3">Difficulty</h3>
                 <DifficultySelector
-                  currentDifficulty={gameState.difficulty}
+                  currentDifficulty="easy" //{gameState.difficulty}
                   onSelect={(difficulty) => {
-                    setDifficulty(difficulty as SpiderDifficulty);
+                    setDifficulty(difficulty);
                     setShowSettings(false);
                     startNewGame();
                   }}
@@ -435,6 +431,12 @@ export function SpiderSolitaire({
         canRedo={canRedo}
         onUndo={undo}
         onRedo={redo}
+        onHint={function (): void {
+          throw new Error("Function not implemented.");
+        }}
+        onMagicWand={function (): void {
+          throw new Error("Function not implemented.");
+        }}
       />
       <div className="p-4">
         {/* Stock pile and Foundation piles */}
@@ -532,9 +534,9 @@ function calculateScore(state: SpiderGameState): number {
   const timeBonus =
     Math.max(0, 1000000 - (Date.now() - state.startTime)) / 1000;
   const difficultyMultiplier = {
-    beginner: 1,
+    easy: 1,
     medium: 1.5,
-    expert: 2,
+    hard: 2,
   }[state.difficulty];
 
   return Math.floor((state.score + timeBonus) * difficultyMultiplier);

@@ -475,6 +475,7 @@ export function FreeCell({ customization, difficulty }: FreeCellProps) {
         onMagicWand={function (): void {
           throw new Error("Function not implemented.");
         }}
+        canRedo={false}
       />
 
       <div className="p-4">

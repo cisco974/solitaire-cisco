@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Difficulty,
   findValidMoves,
   GameAction,
   GameState,
   KlondikeMode,
   ValidMove,
 } from "@/types/cards";
+import { Difficulty } from "@/types/global";
 
 const STORAGE_KEY = "klondike-stats";
 

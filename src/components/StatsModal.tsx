@@ -5,6 +5,7 @@ import { Brain, Clock, Target, Trophy, X, Zap } from "lucide-react";
 import { GameState } from "@/types/cards";
 import { SpiderGameState } from "@/types/spiderCards";
 import { FreeCellGameState } from "@/types/freecellCards";
+import { Difficulty } from "@/types/global";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -19,11 +20,10 @@ export function StatsModal({
   gameType,
   stats,
 }: StatsModalProps) {
-  const [selectedDifficulty, setSelectedDifficulty] = useState<
-    "easy" | "medium" | "hard"
-  >("medium");
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<Difficulty>("medium");
 
-  const getAdvancedStats = (difficulty: "easy" | "medium" | "hard") => {
+  const getAdvancedStats = (difficulty: Difficulty) => {
     // In a real implementation, these would be filtered by difficulty
     const winRate =
       stats.gamesPlayed > 0
