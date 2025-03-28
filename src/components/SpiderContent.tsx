@@ -1,19 +1,23 @@
-import React from 'react';
-import { Trophy, Vibrate as Strategy, Brain, Target, Award } from 'lucide-react';
+import React from "react";
+import { Award, Brain, Trophy, Vibrate as Strategy } from "lucide-react";
 
 export function SpiderContent() {
   return (
     <div className="prose prose-lg max-w-none">
       {/* Game Modes */}
       <section className="mb-16">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Spider Solitaire Variants</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          Spider Solitaire Variants
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">One Suit</h3>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+              One Suit
+            </h3>
             <div className="space-y-4 text-gray-600">
               <p>
-                The perfect starting point for Spider Solitaire, using only Spades
-                for easier sequence building and strategy learning.
+                The perfect starting point for Spider Solitaire, using only
+                Spades for easier sequence building and strategy learning.
               </p>
               <ul className="list-disc list-inside space-y-2">
                 <li>Eight decks of Spades</li>
@@ -25,7 +29,9 @@ export function SpiderContent() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">Two Suits</h3>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+              Two Suits
+            </h3>
             <div className="space-y-4 text-gray-600">
               <p>
                 A balanced challenge using Hearts and Spades, offering increased
@@ -41,7 +47,9 @@ export function SpiderContent() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">Four Suits</h3>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+              Four Suits
+            </h3>
             <div className="space-y-4 text-gray-600">
               <p>
                 The ultimate Spider challenge using all four suits, requiring
@@ -60,7 +68,9 @@ export function SpiderContent() {
 
       {/* About Spider */}
       <section className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">About Spider Solitaire</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          About Spider Solitaire
+        </h2>
 
         <div className="mb-12">
           <h3 className="text-2xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -69,13 +79,15 @@ export function SpiderContent() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Spider Solitaire emerged in 1949 and gained massive popularity when
-              Microsoft included it in Windows ME (2000). Its name comes from the
-              eight foundation piles needed to win, reminiscent of a spider's eight legs.
+              Spider Solitaire emerged in 1949 and gained massive popularity
+              when Microsoft included it in Windows ME (2000). Its name comes
+              from the eight foundation piles needed to win, reminiscent of a
+              spider&apos;s eight legs.
             </p>
             <p>
-              The game's unique multi-deck format and suit-based gameplay have made
-              it a favorite among strategy enthusiasts and puzzle lovers worldwide.
+              The game&apos;s unique multi-deck format and suit-based gameplay
+              have made it a favorite among strategy enthusiasts and puzzle
+              lovers worldwide.
             </p>
           </div>
         </div>
@@ -87,7 +99,8 @@ export function SpiderContent() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Master these key strategies to improve your Spider Solitaire success rate:
+              Master these key strategies to improve your Spider Solitaire
+              success rate:
             </p>
             <ul className="list-disc list-inside space-y-2">
               <li>Expose face-down cards whenever possible</li>

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Clock, BookOpen, TrendingUp } from 'lucide-react';
+import React from "react";
+import { Clock } from "lucide-react";
+import Image from "next/image";
 
 interface Article {
   id: string;
@@ -9,7 +10,7 @@ interface Article {
   category: string;
   readTime: string;
   date: string;
-  type: 'guides' | 'blog';
+  type: "guides" | "blog";
 }
 
 interface ArticleCardProps {
@@ -18,17 +19,17 @@ interface ArticleCardProps {
 }
 
 export function ArticleCard({ article, featured = false }: ArticleCardProps) {
-  const formattedDate = new Date(article.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  const formattedDate = new Date(article.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   if (featured) {
     return (
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <div className="relative h-[400px]">
-          <img
+          <Image
             src={article.image}
             alt={article.title}
             className="absolute inset-0 w-full h-full object-cover"
@@ -44,7 +45,9 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
                 {article.readTime} read
               </span>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">{article.title}</h2>
+            <h2 className="text-3xl font-bold text-white mb-2">
+              {article.title}
+            </h2>
             <p className="text-white/80">{article.description}</p>
           </div>
         </div>
@@ -55,7 +58,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="relative h-48">
-        <img
+        <Image
           src={article.image}
           alt={article.title}
           className="w-full h-full object-cover"
@@ -74,7 +77,9 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
           </span>
           <span>{formattedDate}</span>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{article.title}</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">
+          {article.title}
+        </h3>
         <p className="text-gray-600">{article.description}</p>
       </div>
     </div>

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, FileText, File } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import React, { useEffect, useState } from "react";
+import { BookOpen, File, FileText } from "lucide-react";
 
 interface ContentCounts {
   guides: number;
@@ -8,11 +7,18 @@ interface ContentCounts {
   pages: number;
 }
 
+// Données mockées pour simulation
+const mockCounts: ContentCounts = {
+  guides: 5,
+  articles: 8,
+  pages: 3,
+};
+
 export function DashboardPage() {
   const [counts, setCounts] = useState<ContentCounts>({
     guides: 0,
     articles: 0,
-    pages: 0
+    pages: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -22,37 +28,22 @@ export function DashboardPage() {
 
   const fetchContentCounts = async () => {
     try {
-      const { data: guidesCount } = await supabase
-        .from('content')
-        .select('id', { count: 'exact' })
-        .eq('type', 'guide');
+      // Simuler un délai réseau
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const { data: articlesCount } = await supabase
-        .from('content')
-        .select('id', { count: 'exact' })
-        .eq('type', 'article');
-
-      const { data: pagesCount } = await supabase
-        .from('content')
-        .select('id', { count: 'exact' })
-        .eq('type', 'page');
-
-      setCounts({
-        guides: guidesCount?.length || 0,
-        articles: articlesCount?.length || 0,
-        pages: pagesCount?.length || 0
-      });
+      // Utiliser les données mockées
+      setCounts(mockCounts);
     } catch (error) {
-      console.error('Error fetching content counts:', error);
+      console.error("Error fetching content counts:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const stats = [
-    { name: 'Total Guides', value: counts.guides, icon: BookOpen },
-    { name: 'Total Articles', value: counts.articles, icon: FileText },
-    { name: 'Total Pages', value: counts.pages, icon: File }
+    { name: "Total Guides", value: counts.guides, icon: BookOpen },
+    { name: "Total Articles", value: counts.articles, icon: FileText },
+    { name: "Total Pages", value: counts.pages, icon: File },
   ];
 
   return (
@@ -60,7 +51,8 @@ export function DashboardPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Welcome to the SLTR admin dashboard. Here's an overview of your content.
+          Welcome to the SLTR admin dashboard. Here&apos;s an overview of your
+          content.
         </p>
       </div>
 
@@ -84,12 +76,19 @@ export function DashboardPage() {
             >
               <dt>
                 <div className="absolute rounded-md bg-emerald-500 p-3">
-                  <stat.icon className="h-6 w-6 text-white" aria-hidden="true" />
+                  <stat.icon
+                    className="h-6 w-6 text-white"
+                    aria-hidden="true"
+                  />
                 </div>
-                <p className="ml-16 truncate text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="ml-16 truncate text-sm font-medium text-gray-500">
+                  {stat.name}
+                </p>
               </dt>
               <dd className="ml-16 flex items-baseline pb-6 sm:pb-7">
-                <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {stat.value}
+                </p>
               </dd>
             </div>
           ))}
@@ -99,22 +98,24 @@ export function DashboardPage() {
       {/* Quick Actions */}
       <div className="mt-8">
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-3 gap-4">
-            <button 
-              onClick={() => window.location.href = '/operation/guides/new'}
+            <button
+              onClick={() => (window.location.href = "/operation/guides/new")}
               className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700"
             >
               Create Guide
             </button>
-            <button 
-              onClick={() => window.location.href = '/operation/articles/new'}
+            <button
+              onClick={() => (window.location.href = "/operation/articles/new")}
               className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700"
             >
               Create Article
             </button>
-            <button 
-              onClick={() => window.location.href = '/operation/pages/new'}
+            <button
+              onClick={() => (window.location.href = "/operation/pages/new")}
               className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700"
             >
               Create Page

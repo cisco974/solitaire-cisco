@@ -1,5 +1,12 @@
-import React from 'react';
-import { BookOpen, History, Vibrate as Strategy, Sparkles, Brain, Target } from 'lucide-react';
+import React from "react";
+import {
+  BookOpen,
+  Brain,
+  History,
+  Sparkles,
+  Target,
+  Vibrate as Strategy,
+} from "lucide-react";
 
 export function GameModesSEO() {
   return (
@@ -7,7 +14,7 @@ export function GameModesSEO() {
       {/* Game Modes Section */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Modes de jeu</h2>
-        
+
         {/* Klondike */}
         <div className="bg-white rounded-2xl shadow-sm p-8 mb-8">
           <h3 className="text-2xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -16,13 +23,16 @@ export function GameModesSEO() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Le Klondike est la variante la plus populaire du Solitaire. Le jeu utilise un jeu standard de 52 cartes,
-              disposées en 7 colonnes (le tableau) avec un nombre croissant de cartes par colonne, la carte supérieure
-              étant face visible.
+              Le Klondike est la variante la plus populaire du Solitaire. Le jeu
+              utilise un jeu standard de 52 cartes, disposées en 7 colonnes (le
+              tableau) avec un nombre croissant de cartes par colonne, la carte
+              supérieure étant face visible.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 rounded-xl p-6">
-                <h4 className="font-medium text-gray-900 mb-2">Mode Tirage 1 carte</h4>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Mode Tirage 1 carte
+                </h4>
                 <ul className="list-disc list-inside space-y-2">
                   <li>Plus facile à maîtriser</li>
                   <li>Meilleur contrôle du jeu</li>
@@ -31,7 +41,9 @@ export function GameModesSEO() {
                 </ul>
               </div>
               <div className="bg-gray-50 rounded-xl p-6">
-                <h4 className="font-medium text-gray-900 mb-2">Mode Tirage 3 cartes</h4>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Mode Tirage 3 cartes
+                </h4>
                 <ul className="list-disc list-inside space-y-2">
                   <li>Plus stratégique et challengeant</li>
                   <li>Scoring plus élevé</li>
@@ -51,9 +63,11 @@ export function GameModesSEO() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Spider Solitaire est une variante plus complexe utilisant plusieurs jeux de cartes. Le but est de créer des
-              séquences complètes du Roi à l'As dans la même couleur. Le jeu propose trois niveaux de difficulté basés
-              sur le nombre de couleurs utilisées.
+              Spider Solitaire est une variante plus complexe utilisant
+              plusieurs jeux de cartes. Le but est de créer des séquences
+              complètes du Roi à l&apos;As dans la même couleur. Le jeu propose
+              trois niveaux de difficulté basés sur le nombre de couleurs
+              utilisées.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-50 rounded-xl p-6">
@@ -61,7 +75,7 @@ export function GameModesSEO() {
                 <ul className="list-disc list-inside space-y-2">
                   <li>Utilise uniquement les piques</li>
                   <li>Plus facile à comprendre</li>
-                  <li>Idéal pour l'apprentissage</li>
+                  <li>Idéal pour l&apos;apprentissage</li>
                   <li>8 jeux de piques</li>
                 </ul>
               </div>
@@ -90,7 +104,9 @@ export function GameModesSEO() {
 
       {/* SEO Content Section */}
       <section className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">À propos du Solitaire</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          À propos du Solitaire
+        </h2>
 
         {/* History */}
         <div className="mb-12">
@@ -100,13 +116,18 @@ export function GameModesSEO() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Le Solitaire, également connu sous le nom de "Patience" en Europe, trouve ses origines au XVIIIe siècle.
-              Initialement joué avec des cartes physiques, il est devenu mondialement célèbre grâce à son inclusion dans
-              Windows 3.0 en 1990, devenant ainsi l'un des jeux électroniques les plus joués de l'histoire.
+              Le Solitaire, également connu sous le nom de &quot;Patience&quot;
+              en Europe, trouve ses origines au XVIIIe siècle. Initialement joué
+              avec des cartes physiques, il est devenu mondialement célèbre
+              grâce à son inclusion dans Windows 3.0 en 1990, devenant ainsi
+              l&apos;un des jeux électroniques les plus joués de
+              l&apos;histoire.
             </p>
             <p>
-              La version Klondike, la plus populaire, tire son nom de la région de Klondike au Canada, où elle était
-              très appréciée des chercheurs d'or pendant la ruée vers l'or du Yukon à la fin du XIXe siècle.
+              La version Klondike, la plus populaire, tire son nom de la région
+              de Klondike au Canada, où elle était très appréciée des chercheurs
+              d&apos;or pendant la ruée vers l&apos;or du Yukon à la fin du XIXe
+              siècle.
             </p>
           </div>
         </div>
@@ -119,14 +140,15 @@ export function GameModesSEO() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Pour maximiser vos chances de victoire au Solitaire, plusieurs stratégies clés sont essentielles :
+              Pour maximiser vos chances de victoire au Solitaire, plusieurs
+              stratégies clés sont essentielles :
             </p>
             <ul className="list-disc list-inside space-y-2">
               <li>Libérer les cartes face cachée le plus tôt possible</li>
               <li>Maintenir un équilibre entre les piles de fondation</li>
               <li>Créer des espaces vides stratégiquement</li>
               <li>Garder les Rois en réserve pour les colonnes vides</li>
-              <li>Planifier plusieurs coups à l'avance</li>
+              <li>Planifier plusieurs coups à l&apos;avance</li>
             </ul>
           </div>
         </div>
@@ -139,7 +161,8 @@ export function GameModesSEO() {
           </h3>
           <div className="space-y-4 text-gray-600">
             <p>
-              Le Solitaire n'est pas qu'un simple passe-temps, il offre de nombreux avantages cognitifs :
+              Le Solitaire n&apos;est pas qu&apos;un simple passe-temps, il
+              offre de nombreux avantages cognitifs :
             </p>
             <ul className="list-disc list-inside space-y-2">
               <li>Amélioration de la concentration et de la mémoire</li>
@@ -162,11 +185,16 @@ export function GameModesSEO() {
               <dl className="space-y-4">
                 <div>
                   <dt className="font-medium text-gray-900">Tableau</dt>
-                  <dd>Zone principale de jeu composée de sept colonnes de cartes</dd>
+                  <dd>
+                    Zone principale de jeu composée de sept colonnes de cartes
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-900">Fondation</dt>
-                  <dd>Piles finales où les cartes sont rangées par couleur de l'As au Roi</dd>
+                  <dd>
+                    Piles finales où les cartes sont rangées par couleur de
+                    l&apos;As au Roi
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-900">Talon</dt>
@@ -178,7 +206,9 @@ export function GameModesSEO() {
               <dl className="space-y-4">
                 <div>
                   <dt className="font-medium text-gray-900">Séquence</dt>
-                  <dd>Suite de cartes alternant les couleurs en ordre décroissant</dd>
+                  <dd>
+                    Suite de cartes alternant les couleurs en ordre décroissant
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-900">Cascade</dt>
@@ -186,7 +216,10 @@ export function GameModesSEO() {
                 </div>
                 <div>
                   <dt className="font-medium text-gray-900">Auto-complétion</dt>
-                  <dd>Fonction permettant de terminer automatiquement une partie gagnée</dd>
+                  <dd>
+                    Fonction permettant de terminer automatiquement une partie
+                    gagnée
+                  </dd>
                 </div>
               </dl>
             </div>

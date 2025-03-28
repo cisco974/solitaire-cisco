@@ -1,10 +1,10 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { RotateCcw, Lightbulb, Wand2 } from 'lucide-react';
-import { useHints } from '../hooks/useHints';
-import { useUndoCredits } from '../hooks/useUndoCredits';
-import { useMagicWand } from '../hooks/useMagicWand';
-import { AdModal } from './AdModal';
+import React from "react";
+import { motion } from "framer-motion";
+import { Lightbulb, RotateCcw, Wand2 } from "lucide-react";
+import { useHints } from "../hooks/useHints";
+import { useUndoCredits } from "../hooks/useUndoCredits";
+import { useMagicWand } from "../hooks/useMagicWand";
+import { AdModal } from "./AdModal";
 
 interface GameTopbarProps {
   moves: number;
@@ -15,6 +15,7 @@ interface GameTopbarProps {
   onHint: () => void;
   onMagicWand: () => void;
   extraControls?: React.ReactNode;
+  hasMagicMove?: boolean; // <-- Add this line
 }
 
 export function GameTopbar({
@@ -25,52 +26,52 @@ export function GameTopbar({
   onUndo,
   onHint,
   onMagicWand,
-  extraControls
+  extraControls,
 }: GameTopbarProps) {
-  const { 
-    hintsRemaining, 
-    showAdModal: showHintAdModal, 
-    canUseHint, 
-    useHint, 
-    closeAdModal: closeHintAdModal 
+  const {
+    hintsRemaining,
+    showAdModal: showHintAdModal,
+    canUseHint,
+    useHint: runHint, // 👈 renommage ici
+    closeAdModal: closeHintAdModal,
   } = useHints();
 
   const {
     undosRemaining,
     showAdModal: showUndoAdModal,
     canUseUndo,
-    useUndo,
-    closeAdModal: closeUndoAdModal
+    useUndo: runUndo, // 👈 renommé ici
+    closeAdModal: closeUndoAdModal,
   } = useUndoCredits();
 
   const {
     movesRemaining: magicMovesRemaining,
     showAdModal: showMagicAdModal,
     canUseMagicMove,
-    useMagicMove,
-    closeAdModal: closeMagicAdModal
+    useMagicMove: runMagicMove, // ✅ renommé ici
+    closeAdModal: closeMagicAdModal,
   } = useMagicWand();
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const handleHintClick = () => {
-    if (useHint()) {
+    if (runHint()) {
       onHint();
     }
   };
 
   const handleUndoClick = () => {
-    if (gameCanUndo && useUndo()) {
+    if (gameCanUndo && runUndo()) {
       onUndo();
     }
   };
 
   const handleMagicWandClick = () => {
-    if (useMagicMove()) {
+    if (runMagicMove()) {
       onMagicWand();
     }
   };
@@ -119,7 +120,7 @@ export function GameTopbar({
         {/* Controls */}
         <div className="flex items-center gap-4">
           {extraControls}
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -127,9 +128,10 @@ export function GameTopbar({
             disabled={!gameCanUndo}
             className={`
               relative ${actionButtonClasses}
-              ${gameCanUndo 
-                ? 'text-white' 
-                : 'text-white/20 cursor-not-allowed hover:bg-white/10'
+              ${
+                gameCanUndo
+                  ? "text-white"
+                  : "text-white/20 cursor-not-allowed hover:bg-white/10"
               }
             `}
             title="Undo"
@@ -139,7 +141,7 @@ export function GameTopbar({
             {(undosRemaining > 0 || !canUseUndo) && gameCanUndo && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
-                  {undosRemaining > 0 ? undosRemaining : 'Ad'}
+                  {undosRemaining > 0 ? undosRemaining : "Ad"}
                 </span>
               </div>
             )}
@@ -156,7 +158,7 @@ export function GameTopbar({
             {(hintsRemaining > 0 || !canUseHint) && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
-                  {hintsRemaining > 0 ? hintsRemaining : 'Ad'}
+                  {hintsRemaining > 0 ? hintsRemaining : "Ad"}
                 </span>
               </div>
             )}
@@ -173,7 +175,7 @@ export function GameTopbar({
             {(magicMovesRemaining > 0 || !canUseMagicMove) && (
               <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 rounded-md flex items-center justify-center">
                 <span className="text-white text-xs font-bold">
-                  {magicMovesRemaining > 0 ? magicMovesRemaining : 'Ad'}
+                  {magicMovesRemaining > 0 ? magicMovesRemaining : "Ad"}
                 </span>
               </div>
             )}

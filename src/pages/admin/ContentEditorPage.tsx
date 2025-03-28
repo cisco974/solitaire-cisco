@@ -1,49 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
-import { Content, ContentType, Language } from '../../types/admin';
-import { Editor } from '../../components/admin/Editor';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { Content, ContentType, Language } from "@/types/admin";
+import { Editor } from "@components/admin/Editor";
 
 interface ContentEditorPageProps {
   type: ContentType;
 }
 
 const languages = [
-  { code: 'fr', name: 'Français', title: 'Solitaire', flag: '🇫🇷' },
-  { code: 'en', name: 'English', title: 'Solitaire', flag: '🇬🇧' },
-  { code: 'es', name: 'Español', title: 'Solitario', flag: '🇪🇸' },
-  { code: 'it', name: 'Italiano', title: 'Solitario', flag: '🇮🇹' },
-  { code: 'pt', name: 'Português', title: 'Solitário', flag: '🇵🇹' },
-  { code: 'de', name: 'Deutsch', title: 'Solitär', flag: '🇩🇪' },
-  { code: 'nl', name: 'Nederlands', title: 'Solitaire', flag: '🇳🇱' },
-  { code: 'ro', name: 'Română', title: 'Solitar', flag: '🇷🇴' },
-  { code: 'cs', name: 'Čeština', title: 'Solitaire', flag: '🇨🇿' },
-  { code: 'sk', name: 'Slovenčina', title: 'Solitaire', flag: '🇸🇰' },
-  { code: 'zh', name: '中文', title: '纸牌接龙', flag: '🇨🇳' },
-  { code: 'id', name: 'Indonesia', title: 'Solitaire', flag: '🇮🇩' },
-  { code: 'ms', name: 'Melayu', title: 'Solitaire', flag: '🇲🇾' },
-  { code: 'hi', name: 'हिन्दी', title: 'सॉलिटेयर', flag: '🇮🇳' },
-  { code: 'tl', name: 'Filipino', title: 'Solitaire', flag: '🇵🇭' }
+  { code: "fr", name: "Français", title: "Solitaire", flag: "🇫🇷" },
+  { code: "en", name: "English", title: "Solitaire", flag: "🇬🇧" },
+  { code: "es", name: "Español", title: "Solitario", flag: "🇪🇸" },
+  { code: "it", name: "Italiano", title: "Solitario", flag: "🇮🇹" },
+  { code: "pt", name: "Português", title: "Solitário", flag: "🇵🇹" },
+  { code: "de", name: "Deutsch", title: "Solitär", flag: "🇩🇪" },
+  { code: "nl", name: "Nederlands", title: "Solitaire", flag: "🇳🇱" },
+  { code: "ro", name: "Română", title: "Solitar", flag: "🇷🇴" },
+  { code: "cs", name: "Čeština", title: "Solitaire", flag: "🇨🇿" },
+  { code: "sk", name: "Slovenčina", title: "Solitaire", flag: "🇸🇰" },
+  { code: "zh", name: "中文", title: "纸牌接龙", flag: "🇨🇳" },
+  { code: "id", name: "Indonesia", title: "Solitaire", flag: "🇮🇩" },
+  { code: "ms", name: "Melayu", title: "Solitaire", flag: "🇲🇾" },
+  { code: "hi", name: "हिन्दी", title: "सॉलिटेयर", flag: "🇮🇳" },
+  { code: "tl", name: "Filipino", title: "Solitaire", flag: "🇵🇭" },
 ];
+
+// Données mockées pour simuler un contenu
+const mockContent: Record<string, Content> = {
+  "1": {
+    id: "1",
+    type: "guide",
+    title: "How to Play Solitaire",
+    slug: "how-to-play-solitaire",
+    content: "<p>This is a guide to playing solitaire.</p>",
+    language: "en",
+    status: "published",
+    meta_title: "How to Play Solitaire - Guide",
+    meta_description:
+      "Learn how to play solitaire with this comprehensive guide.",
+    created_at: "2024-01-01T12:00:00.000Z",
+    updated_at: "2024-01-01T12:00:00.000Z",
+    author_id: "1",
+  },
+};
 
 export function ContentEditorPage({ type }: ContentEditorPageProps) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [content, setContent] = useState<Partial<Content>>({
     type,
-    title: '',
-    slug: '',
-    content: '',
-    language: 'en',
-    status: 'draft',
-    meta_title: '',
-    meta_description: ''
+    title: "",
+    slug: "",
+    content: "",
+    language: "en",
+    status: "draft",
+    meta_title: "",
+    meta_description: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (id !== 'new') {
+    if (id !== "new") {
       fetchContent();
     } else {
       setLoading(false);
@@ -52,16 +71,16 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
 
   const fetchContent = async () => {
     try {
-      const { data, error } = await supabase
-        .from('content')
-        .select('*')
-        .eq('id', id)
-        .single();
+      setLoading(true);
+      // Simuler un délai réseau
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (error) throw error;
-      setContent(data || {});
+      // Vérifier si le contenu existe dans notre mock
+      if (id && mockContent[id]) {
+        setContent(mockContent[id]);
+      }
     } catch (error) {
-      console.error('Error fetching content:', error);
+      console.error("Error fetching content:", error);
     } finally {
       setLoading(false);
     }
@@ -72,24 +91,15 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
     setSaving(true);
 
     try {
-      if (id === 'new') {
-        const { error } = await supabase
-          .from('content')
-          .insert([content]);
+      // Simuler un délai de sauvegarde
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('content')
-          .update(content)
-          .eq('id', id);
-
-        if (error) throw error;
-      }
+      // Log du contenu au lieu de le sauvegarder dans Supabase
+      console.log("Content to save:", content);
 
       navigate(`/operation/${type}s`);
     } catch (error) {
-      console.error('Error saving content:', error);
+      console.error("Error saving content:", error);
     } finally {
       setSaving(false);
     }
@@ -108,7 +118,7 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            {id === 'new' ? `New ${type}` : `Edit ${type}`}
+            {id === "new" ? `New ${type}` : `Edit ${type}`}
           </h2>
         </div>
       </div>
@@ -118,7 +128,10 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
           <div className="p-6 space-y-6">
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Title
               </label>
               <div className="mt-2">
@@ -126,7 +139,9 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
                   type="text"
                   id="title"
                   value={content.title}
-                  onChange={(e) => setContent({ ...content, title: e.target.value })}
+                  onChange={(e) =>
+                    setContent({ ...content, title: e.target.value })
+                  }
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -134,7 +149,10 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
 
             {/* Slug */}
             <div>
-              <label htmlFor="slug" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="slug"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Slug
               </label>
               <div className="mt-2">
@@ -142,7 +160,9 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
                   type="text"
                   id="slug"
                   value={content.slug}
-                  onChange={(e) => setContent({ ...content, slug: e.target.value })}
+                  onChange={(e) =>
+                    setContent({ ...content, slug: e.target.value })
+                  }
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -150,30 +170,43 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
 
             {/* Content */}
             <div>
-              <label htmlFor="content" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="content"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Content
               </label>
               <div className="mt-2">
-                <Editor 
-                  content={content.content || ''} 
-                  onChange={(newContent) => setContent({ ...content, content: newContent })}
+                <Editor
+                  content={content.content || ""}
+                  onChange={(newContent) =>
+                    setContent({ ...content, content: newContent })
+                  }
                 />
               </div>
             </div>
 
             {/* Language */}
             <div>
-              <label htmlFor="language" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="language"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Language
               </label>
               <div className="mt-2">
                 <select
                   id="language"
                   value={content.language}
-                  onChange={(e) => setContent({ ...content, language: e.target.value as Language })}
+                  onChange={(e) =>
+                    setContent({
+                      ...content,
+                      language: e.target.value as Language,
+                    })
+                  }
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
                 >
-                  {languages.map(lang => (
+                  {languages.map((lang) => (
                     <option key={lang.code} value={lang.code}>
                       {lang.flag} {lang.name} - {lang.title}
                     </option>
@@ -184,14 +217,22 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
 
             {/* Status */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="status"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Status
               </label>
               <div className="mt-2">
                 <select
                   id="status"
                   value={content.status}
-                  onChange={(e) => setContent({ ...content, status: e.target.value as 'draft' | 'published' })}
+                  onChange={(e) =>
+                    setContent({
+                      ...content,
+                      status: e.target.value as "draft" | "published",
+                    })
+                  }
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
                 >
                   <option value="draft">Draft</option>
@@ -202,15 +243,20 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
 
             {/* Meta Title */}
             <div>
-              <label htmlFor="meta_title" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="meta_title"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Meta Title
               </label>
               <div className="mt-2">
                 <input
                   type="text"
                   id="meta_title"
-                  value={content.meta_title || ''}
-                  onChange={(e) => setContent({ ...content, meta_title: e.target.value })}
+                  value={content.meta_title || ""}
+                  onChange={(e) =>
+                    setContent({ ...content, meta_title: e.target.value })
+                  }
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -218,15 +264,20 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
 
             {/* Meta Description */}
             <div>
-              <label htmlFor="meta_description" className="block text-sm font-medium leading-6 text-gray-900">
+              <label
+                htmlFor="meta_description"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
                 Meta Description
               </label>
               <div className="mt-2">
                 <textarea
                   id="meta_description"
                   rows={3}
-                  value={content.meta_description || ''}
-                  onChange={(e) => setContent({ ...content, meta_description: e.target.value })}
+                  value={content.meta_description || ""}
+                  onChange={(e) =>
+                    setContent({ ...content, meta_description: e.target.value })
+                  }
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -246,7 +297,7 @@ export function ContentEditorPage({ type }: ContentEditorPageProps) {
               disabled={saving}
               className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? "Saving..." : "Save"}
             </button>
           </div>
         </div>

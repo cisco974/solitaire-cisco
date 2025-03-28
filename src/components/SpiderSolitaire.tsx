@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card as CardComponent } from "./Card";
 import { DifficultySelector } from "./DifficultySelector";
 import { GameTopbar } from "./GameTopbar";
 import { FoundationPile } from "./FoundationPile";
-import { Card, isPartOfDescendingSequence } from "@/types/cards";
+import { Card, isPartOfDescendingSequence, Rank, Suit } from "@/types/cards";
 import {
   checkSpiderWinCondition,
   isValidSpiderFoundationMove,
@@ -21,6 +21,7 @@ import { GameCustomization } from "@/types/customization";
 interface SpiderSolitaireProps {
   mode?: "draw-1" | "draw-3";
   customization: GameCustomization;
+  difficulty?: "easy" | "medium" | "hard";
 }
 
 function shuffle(array: Card[]): Card[] {
@@ -113,7 +114,7 @@ export function SpiderSolitaire({
     for (let d = 0; d < numDecks; d++) {
       for (const suit of suits) {
         for (const rank of ranks) {
-          deck.push({ suit, rank, faceUp: false });
+          deck.push({ suit: suit as Suit, rank: rank as Rank, faceUp: false });
         }
       }
     }
@@ -121,7 +122,7 @@ export function SpiderSolitaire({
     return shuffle(deck);
   }
 
-  function startNewGame() {
+  const startNewGame = useCallback(() => {
     const deck = createSpiderDeck();
     const newTableauPiles: Card[][] = Array(10)
       .fill([])
@@ -153,7 +154,7 @@ export function SpiderSolitaire({
       startTime: Date.now(),
       isComplete: false,
     });
-  }
+  }, [updateState]);
 
   const handleDealCards = () => {
     if (gameState.stock.length === 0 || isDealing) {
@@ -382,7 +383,6 @@ export function SpiderSolitaire({
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Win Modal */}
       <AnimatePresence>
         {gameState.isComplete && (
@@ -410,7 +410,7 @@ export function SpiderSolitaire({
                 Congratulations!
               </h2>
               <p className="text-gray-600 text-center mb-6">
-                You've won with a score of {gameState.score}!
+                You&apos;ve won with a score of {gameState.score}!
               </p>
               <div className="flex justify-center">
                 <motion.button
@@ -426,7 +426,6 @@ export function SpiderSolitaire({
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Game Topbar */}
       <GameTopbar
         moves={gameState.moves}
@@ -437,13 +436,11 @@ export function SpiderSolitaire({
         onUndo={undo}
         onRedo={redo}
       />
-
       <div className="p-4">
         {/* Stock pile and Foundation piles */}
         <div className="grid grid-cols-10 gap-1 mb-6">
           {/* Stock pile in columns 1-2 */}
           <div className="col-span-2">{renderStockPile()}</div>
-
           {/* Foundation piles in columns 3-10 */}
           {Array(8)
             .fill(null)
@@ -456,7 +453,6 @@ export function SpiderSolitaire({
               );
             })}
         </div>
-
         {/* Tableau piles */}
         <div className="grid grid-cols-10 gap-1">
           {gameState.tableauPiles.map((pile, pileIndex) => (

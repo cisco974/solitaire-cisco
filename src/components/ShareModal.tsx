@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Facebook, Share2, Copy, MessageCircle, Send, X } from 'lucide-react';
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Copy, Facebook, MessageCircle, Send, X } from "lucide-react";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -10,33 +10,55 @@ interface ShareModalProps {
 export function ShareModal({ isOpen, onClose }: ShareModalProps) {
   const shareOptions = [
     {
-      name: 'Facebook',
+      name: "Facebook",
       icon: Facebook,
-      color: 'bg-[#1877F2] hover:bg-[#0C63D4]',
-      onClick: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`, '_blank')
+      color: "bg-[#1877F2] hover:bg-[#0C63D4]",
+      onClick: () =>
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+          "_blank",
+        ),
     },
     {
-      name: 'X.com',
+      name: "X.com",
       icon: () => (
-        <svg width="20" height="20" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor"/>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 1200 1227"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"
+            fill="currentColor"
+          />
         </svg>
       ),
-      color: 'bg-black hover:bg-gray-800',
-      onClick: () => window.open(`https://twitter.com/intent/tweet?url=${window.location.href}`, '_blank')
+      color: "bg-black hover:bg-gray-800",
+      onClick: () =>
+        window.open(
+          `https://twitter.com/intent/tweet?url=${window.location.href}`,
+          "_blank",
+        ),
     },
     {
-      name: 'WhatsApp',
+      name: "WhatsApp",
       icon: MessageCircle,
-      color: 'bg-[#25D366] hover:bg-[#20BD5C]',
-      onClick: () => window.open(`https://wa.me/?text=${window.location.href}`, '_blank')
+      color: "bg-[#25D366] hover:bg-[#20BD5C]",
+      onClick: () =>
+        window.open(`https://wa.me/?text=${window.location.href}`, "_blank"),
     },
     {
-      name: 'Telegram',
+      name: "Telegram",
       icon: Send,
-      color: 'bg-[#0088cc] hover:bg-[#0077b3]',
-      onClick: () => window.open(`https://t.me/share/url?url=${window.location.href}`, '_blank')
-    }
+      color: "bg-[#0088cc] hover:bg-[#0077b3]",
+      onClick: () =>
+        window.open(
+          `https://t.me/share/url?url=${window.location.href}`,
+          "_blank",
+        ),
+    },
   ];
 
   const copyToClipboard = async () => {
@@ -44,7 +66,7 @@ export function ShareModal({ isOpen, onClose }: ShareModalProps) {
       await navigator.clipboard.writeText(window.location.href);
       // You could add a toast notification here
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error("Failed to copy:", err);
     }
   };
 
@@ -80,7 +102,11 @@ export function ShareModal({ isOpen, onClose }: ShareModalProps) {
                   onClick={option.onClick}
                   className={`${option.color} text-white rounded-lg p-4 flex items-center justify-center gap-2 transition-colors`}
                 >
-                  {typeof option.icon === 'function' ? <option.icon /> : <option.icon className="w-5 h-5" />}
+                  {typeof option.icon === "function"
+                    ? React.createElement(option.icon)
+                    : React.createElement(option.icon, {
+                        className: "w-5 h-5",
+                      })}
                   <span>{option.name}</span>
                 </button>
               ))}

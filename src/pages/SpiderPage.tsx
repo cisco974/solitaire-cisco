@@ -175,7 +175,7 @@ export function SpiderPage() {
               <SpiderSolitaire
                 key={`spider-${gameKey}`}
                 customization={customization}
-                mode={spiderMode}
+                difficulty={difficulty}
               />
             </div>
           </div>

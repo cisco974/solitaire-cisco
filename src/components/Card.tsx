@@ -31,7 +31,7 @@ export function Card({
   card,
   onClick,
   draggable = false,
-  isDragging = false,
+
   onDragStart,
   onDragEnd,
   onDragOver,

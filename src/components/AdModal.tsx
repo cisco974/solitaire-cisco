@@ -15,7 +15,7 @@ export function AdModal({ isOpen, onClose }: AdModalProps) {
     if (isOpen && !isWatching) {
       setIsWatching(true);
     }
-  }, [isOpen]);
+  }, [isOpen, isWatching]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;

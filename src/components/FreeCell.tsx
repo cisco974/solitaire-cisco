@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card as CardComponent } from "./Card";
 import { DifficultySelector } from "./DifficultySelector";
 import { GameTopbar } from "./GameTopbar";
 import { FoundationPile } from "./FoundationPile";
-import { Card, getCardColor, getRankValue } from "@/types/cards";
+import { Card, getCardColor, getRankValue, Rank, Suit } from "@/types/cards";
 import {
   checkFreeCellWinCondition,
   FreeCellGameState,
@@ -19,6 +19,7 @@ import { GameCustomization } from "@/types/customization";
 
 interface FreeCellProps {
   customization: GameCustomization;
+  difficulty: "easy" | "medium" | "hard";
 }
 
 function createFreeCellDeck(): Card[] {
@@ -42,7 +43,7 @@ function createFreeCellDeck(): Card[] {
 
   for (const suit of suits) {
     for (const rank of ranks) {
-      deck.push({ suit, rank, faceUp: true }); // All cards are face up in FreeCell
+      deck.push({ suit: suit as Suit, rank: rank as Rank, faceUp: true }); // All cards are face up in FreeCell
     }
   }
 
@@ -58,15 +59,15 @@ function shuffle(array: Card[]): Card[] {
   return newArray;
 }
 
-export function FreeCell({ customization }: FreeCellProps) {
+export function FreeCell({ customization, difficulty }: FreeCellProps) {
   const {
     gameState,
     updateState,
     addMove,
     undo,
-    redo,
+
     canUndo,
-    canRedo,
+
     updateStats,
   } = useFreeCellGameState();
   const [draggedCards, setDraggedCards] = useState<{
@@ -77,11 +78,14 @@ export function FreeCell({ customization }: FreeCellProps) {
   } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const { playCardMove, playCardFlip, playWin, playError } = useSoundEffects();
+  const { playCardMove, playWin, playError } = useSoundEffects();
 
+  // Appliquer la difficulté à partir des props
   useEffect(() => {
-    startNewGame();
-  }, []);
+    updateState({
+      difficulty: difficulty,
+    });
+  }, [difficulty, updateState]);
 
   useEffect(() => {
     if (checkFreeCellWinCondition(gameState.foundationPiles)) {
@@ -92,7 +96,7 @@ export function FreeCell({ customization }: FreeCellProps) {
       });
       updateStats(true);
     }
-  }, [gameState.foundationPiles, playWin, updateState, updateStats]);
+  }, [gameState, playWin, updateState, updateStats]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -104,19 +108,16 @@ export function FreeCell({ customization }: FreeCellProps) {
     return () => clearInterval(timer);
   }, [gameState.startTime, gameState.isComplete]);
 
-  function startNewGame() {
+  const startNewGame = useCallback(() => {
     const deck = createFreeCellDeck();
     const newTableauPiles: Card[][] = Array(8)
       .fill([])
       .map(() => []);
-
-    // Deal cards to tableau piles
     for (let i = 0; i < 52; i++) {
       const pileIndex = i % 8;
       const card = deck.pop()!;
       newTableauPiles[pileIndex] = [...newTableauPiles[pileIndex], card];
     }
-
     updateState({
       tableauPiles: newTableauPiles,
       foundationPiles: Array(4).fill([]),
@@ -125,9 +126,12 @@ export function FreeCell({ customization }: FreeCellProps) {
       moves: 0,
       startTime: Date.now(),
       isComplete: false,
+      difficulty: difficulty,
     });
-  }
-
+  }, [difficulty, updateState]);
+  useEffect(() => {
+    startNewGame();
+  }, [startNewGame]);
   const isValidSequence = (cards: Card[]): boolean => {
     if (cards.length === 0) return true;
     if (cards.length === 1) return true;
@@ -393,9 +397,10 @@ export function FreeCell({ customization }: FreeCellProps) {
               <div className="mb-6">
                 <h3 className="text-gray-700 font-medium mb-3">Difficulty</h3>
                 <DifficultySelector
-                  currentDifficulty={gameState.difficulty}
-                  onSelect={(difficulty) => {
+                  currentDifficulty={difficulty}
+                  onSelect={(newDifficulty) => {
                     setShowSettings(false);
+                    updateState({ difficulty: newDifficulty });
                     startNewGame();
                   }}
                 />
@@ -440,7 +445,7 @@ export function FreeCell({ customization }: FreeCellProps) {
                 Congratulations!
               </h2>
               <p className="text-gray-600 text-center mb-6">
-                You've won with a score of {gameState.score}!
+                You`ve won with a score of {gameState.score}!
               </p>
               <div className="flex justify-center">
                 <motion.button
@@ -463,9 +468,13 @@ export function FreeCell({ customization }: FreeCellProps) {
         elapsedTime={elapsedTime}
         score={gameState.score}
         canUndo={canUndo}
-        canRedo={canRedo}
         onUndo={undo}
-        onRedo={redo}
+        onHint={function (): void {
+          throw new Error("Function not implemented.");
+        }}
+        onMagicWand={function (): void {
+          throw new Error("Function not implemented.");
+        }}
       />
 
       <div className="p-4">
